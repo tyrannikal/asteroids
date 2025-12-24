@@ -13,6 +13,11 @@ def main():
     if(not (game_modules[0] > 0 and game_modules[1] == 0)):
         print(f"{main.__name__}: pygame.init must have at least 1 module succeed with 0 failures")
 
+    clock = pygame.time.Clock()
+    if(not (type(clock) == pygame.time.Clock)):
+        print(f"{main.__name__}: pygame.time.Clock must return a clock")
+    dt = 0
+
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     if(not (type(screen) == pygame.surface.Surface)):
         print(f"{main.__name__}: pygame.display.set_mode must return a Surface type")
@@ -22,8 +27,11 @@ def main():
         if(not (type(current_log_state) == type(None))):
             print(f"{main.__name__}: log_state must return None type")
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        event_list = pygame.event.get()
+        if(not (type(event_list) == list and len(event_list) >= 0)):
+            print(f"{main.__name__}: pygame.event.get must return an list >= 0")
+        for event in range(0, len(event_list)):
+            if event_list[event].type == pygame.QUIT:
                 return
 
         all_black_surface = screen.fill("black")
@@ -35,6 +43,12 @@ def main():
         refresh_screen = pygame.display.flip()
         if(not (type(refresh_screen) == type(None))):
             print(f"{main.__name__}: screen.display.flip must return None type")
+
+        tick = clock.tick(60)
+        if(not (type(tick) == int and tick >= 0)):
+            print(f"{main.__name__}: clock.tick() must return the int >= 0 milliseconds passed since last tick")
+        dt = tick / 1000
+
 
 if __name__ == "__main__":
     main()
