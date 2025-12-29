@@ -1,6 +1,10 @@
 import pygame
+from typing import Any, Callable
 from constants import PLAYER_RADIUS, LINE_WIDTH
 from circleshape import CircleShape
+
+from pydantic_core import CoreSchema, core_schema
+from pydantic import BaseModel, GetCoreSchemaHandler, ValidationError
 
 class Player(CircleShape):
     def __init__(self, x, y):
@@ -14,6 +18,17 @@ class Player(CircleShape):
             print(f"{self.__init__.__name__}: super().__init__ must return None")
 
         self.rotation = 0
+
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type, _handler) -> core_schema.CoreSchema:
+        return (core_schema.no_info_before_validator_function(cls._validate, schema=core_schema.any_schema(),))
+
+    @staticmethod
+    def _validate(v,):
+        if isinstance(v, Player):
+            return v
+        raise TypeError("must be of type Player")
 
 
     def triangle(self):
