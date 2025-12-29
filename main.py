@@ -1,11 +1,21 @@
-import pygame
 from typing import Any, Callable
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT 
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationError,
+    field_validator,
+    GetCoreSchemaHandler,
+    model_validator,
+    validate_call,
+)
+from pydantic_core import CoreSchema, core_schema
+import pygame
+
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 from logger import log_state
 from player import Player
-
-from pydantic_core import CoreSchema, core_schema
-from pydantic import BaseModel, ConfigDict, Field, field_validator, GetCoreSchemaHandler, model_validator, validate_call, ValidationError
 
 
 class SurfaceWrapped(BaseModel):
@@ -19,18 +29,14 @@ class SurfaceWrapped(BaseModel):
     
     @model_validator(mode="before")
     def accept_raw_surface(cls, data):
-        if isinstance(data, pygame.surface.Surface):
-            return {"object": data}
-        if isinstance(data, dict):
-            return data
-        raise TypeError(
-            "SurfaceWrapped must receive a type pygame.Surface or dict key")
-
+        if not isinstance(data, pygame.surface.Surface):
+            raise ValidationError("SurfaceWrapped must receive a type pygame.Surface or dict key")
+        return {"object": data}
 
     @field_validator("object")
     def ensure_instance(cls, value):
         if not isinstance(value, pygame.surface.Surface):
-            raise ValueError("must be pygame.surface.Surface")
+            raise ValidationError("must be pygame.surface.Surface")
         return value
 
 
@@ -45,32 +51,39 @@ class RectWrapped(BaseModel):
 
     @model_validator(mode="before")
     def accept_raw_rect(cls, data):
-        if isinstance(data, pygame.rect.Rect):
-            return {"object": data}
-        if isinstance(data, dict):
-            return data
-        raise TypeError(
-            "RectWrapped must receive a type pygame.Surface or dict key")
+        if not isinstance(data, pygame.rect.Rect):
+            raise ValidationError("RectWrapped must receive a type pygame.Surface or dict key")
+        return {"object": data}
 
 
     @field_validator("object")
     def ensure_instance(cls, value):
         if not isinstance(value, pygame.rect.Rect):
-            raise ValueError("must be pygame.rect.Rect")
+            raise ValidationError("must be pygame.rect.Rect")
         return value
 
 
 class GameArea(BaseModel):
-    width: int = Field(validate_default=True, default=SCREEN_WIDTH, gt=0, frozen=True)
-    height: int = Field(validate_default=True, default=SCREEN_HEIGHT, gt=0, frozen=True)
+    width: int = Field(default=SCREEN_WIDTH,
+                       validate_default=True,
+                       gt=0,
+                       frozen=True,
+                       )
+    height: int = Field(default=SCREEN_HEIGHT,
+                       validate_default=True,
+                       gt=0,
+                       frozen=True,
+                       )
 
     @property
     def GetWidth(self) -> int:
         return self.width
 
+
     @property
     def GetHeight(self) -> int:
         return self.height
+
 
     class ConfigDict:
         validate_assignment = True
@@ -106,18 +119,18 @@ def NewPlayerCenter() -> Player:
 @validate_call(validate_return=True)
 def FillBackground(screen: SurfaceWrapped, color: str) -> RectWrapped:
     assert color in pygame.colordict.THECOLORS, "background color must be listed in pygame.colordict.THECOLORS"
+
     unwrapped_screen: pygame.surface.Surface = screen.object
-
     background: pygame.rect.Rect = unwrapped_screen.fill(color)
-    assert type(background) == pygame.rect.Rect
 
+    assert type(background) == pygame.rect.Rect
     background_size: tuple = pygame.Surface.get_size(unwrapped_screen)
     assert type(background_size) == tuple, "get_size must return type tuple"
     assert len(background_size) == 2, "get_size must return a tuple of length 2"
     assert background_size[0] == game_area.GetWidth, "screen background width must equal game_area width"
     assert background_size[1] == game_area.GetHeight, "screen background height must equal game_area height"
 
-    return RectWrapped(object=background)
+    return background
 
 
 def main():
