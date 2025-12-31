@@ -1,17 +1,17 @@
-from pydantic_core import CoreSchema, core_schema
-from pydantic import validate_call
+from pydantic_core import core_schema
+from pydantic import ValidationError, validate_call
 
 from circleshape import CircleShape
 import pygame
 
-from constants import PlayerDimensions 
+from constants import PlayerDimensions
 from validationfunctions import SurfaceWrapped
 
 
 class Player(CircleShape):
     def __init__(self, x: float, y: float) -> None:
         assert type(x) == float, "x must be a float"
-        assert type (y) == float, "y must be a float"
+        assert type(y) == float, "y must be a float"
 
         player = super().__init__(x, y, PlayerDimensions().PLAYER_RADIUS)
         assert player == None, "super().__init__ must return None"
@@ -20,10 +20,12 @@ class Player(CircleShape):
 
         return None
 
-
     @classmethod
     def __get_pydantic_core_schema__(cls, _source_type, _handler) -> core_schema.CoreSchema:
-        return (core_schema.no_info_before_validator_function(cls._validate, schema=core_schema.any_schema(),))
+        return core_schema.no_info_before_validator_function(
+            cls._validate,
+            schema=core_schema.any_schema(),
+        )
 
     @staticmethod
     def _validate(value):
@@ -45,7 +47,6 @@ class Player(CircleShape):
 
         return [a, b, c]
 
-
     @validate_call(validate_return=True)
     def draw(self, screen: SurfaceWrapped) -> None:
         get_player_triangle: list = self.triangle()
@@ -55,8 +56,9 @@ class Player(CircleShape):
         assert type(get_player_triangle[1]) == pygame.Vector2, "each list index must be a Vector2"
         assert type(get_player_triangle[2]) == pygame.Vector2, "each list index must be a Vector2"
 
-        draw_player: pygame.rect.Rect = pygame.draw.polygon(screen.object, "white", get_player_triangle, PlayerDimensions().LINE_WIDTH)
+        draw_player: pygame.rect.Rect = pygame.draw.polygon(
+            screen.object, "white", get_player_triangle, PlayerDimensions().LINE_WIDTH
+        )
         assert type(draw_player) == pygame.rect.Rect, "pygame.draw.polygon must return type Rect"
 
         return None
-

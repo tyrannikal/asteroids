@@ -1,5 +1,6 @@
 import pygame
 
+
 # Base class for game objects
 class CircleShape(pygame.sprite.Sprite):
     def __init__(self, x: float, y: float, radius: int) -> None:
@@ -8,8 +9,9 @@ class CircleShape(pygame.sprite.Sprite):
         assert type(radius) == int, "radius must be a int"
 
         # we will be using this later
-        if hasattr(self, "containers"):
-            super().__init__(self.containers)
+        containers = getattr(self, "containers", None)
+        if containers is not None:
+            super().__init__(containers)
         else:
             super().__init__()
 
@@ -26,4 +28,3 @@ class CircleShape(pygame.sprite.Sprite):
     def update(self, dt):
         # must override
         pass
-

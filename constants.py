@@ -17,4 +17,3 @@ class GameArea(BaseModel):
     SCREEN_WIDTH: int = Field(gt=0, default=screen_width_literal, validate_default=True)
     SCREEN_HEIGHT: int = Field(gt=0, default=screen_height_literal, validate_default=True)
     model_config = ConfigDict(frozen=True)
-
