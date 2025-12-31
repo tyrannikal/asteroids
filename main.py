@@ -1,16 +1,4 @@
-from typing import Any, Callable
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    GetCoreSchemaHandler,
-    ValidationError,
-    field_validator,
-    model_validator,
-    validate_call,
-)
-from pydantic_core import CoreSchema, core_schema
+from pydantic import validate_call
 import pygame
 
 from constants import GameArea 
@@ -18,35 +6,6 @@ from validationfunctions import SurfaceWrapped, RectWrapped
 from logger import log_state
 from player import Player
 
-"""
-class GameArea(BaseModel):
-    width: int = Field(default=SCREEN_WIDTH,
-                       validate_default=True,
-                       gt=0,
-                       frozen=True,
-                       )
-    height: int = Field(default=SCREEN_HEIGHT,
-                       validate_default=True,
-                       gt=0,
-                       frozen=True,
-                       )
-
-    @property
-    def GetWidth(self) -> int:
-        return self.width
-
-
-    @property
-    def GetHeight(self) -> int:
-        return self.height
-
-
-    class ConfigDict:
-        validate_assignment = True
-
-
-game_area = GameArea() 
-"""
 
 @validate_call(validate_return=True)
 def PrintWelcomeMessage() -> None:
@@ -76,11 +35,10 @@ def NewPlayerCenter() -> Player:
 def FillBackground(screen: SurfaceWrapped, color: str) -> RectWrapped:
     assert color in pygame.colordict.THECOLORS, "background color must be listed in pygame.colordict.THECOLORS"
 
-    unwrapped_screen: pygame.surface.Surface = screen.object
-    background: pygame.rect.Rect = unwrapped_screen.fill(color)
+    background: pygame.rect.Rect = screen.object.fill(color)
 
     assert type(background) == pygame.rect.Rect
-    background_size: tuple = pygame.Surface.get_size(unwrapped_screen)
+    background_size: tuple = pygame.Surface.get_size(screen.object)
     assert type(background_size) == tuple, "get_size must return type tuple"
     assert len(background_size) == 2, "get_size must return a tuple of length 2"
     assert background_size[0] == GameArea().SCREEN_WIDTH, "screen background width must equal game_area width"
@@ -112,13 +70,12 @@ def main():
 
         event_list: list = pygame.event.get()
         assert type(event_list) == list, "pygame.event.get() must return type list"
-        for event in range(0, len(event_list)):
-            if event_list[event].type == pygame.QUIT:
+        for event in event_list:
+            if event.type == pygame.QUIT:
                 return None
 
         background: RectWrapped = FillBackground(new_screen, "black")
         assert type(background) == RectWrapped, "FillBackground must return type RectWrapped"
-        assert type(background.object) == pygame.rect.Rect, "FillBackground.object must be type pygame.rect.Rect"
 
         draw_player: None = new_player.draw(new_screen)
         assert draw_player == None, "player.draw must return type None"
@@ -129,7 +86,7 @@ def main():
         tick: int = clock.tick(60)
         assert type(tick) == int, "clock.tick must return type int"
         assert tick >= 0, "clock.tick must return an integer >= 0"
-        dt = tick / 1000
+        dt: int = tick / 1000
 
 
 if __name__ == "__main__":

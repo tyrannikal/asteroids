@@ -9,6 +9,7 @@ from pydantic import (
     model_validator,
 )
 
+
 class SurfaceWrapped(BaseModel):
     object: pygame.surface.Surface
 
