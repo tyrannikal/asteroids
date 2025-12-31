@@ -1,23 +1,37 @@
-import pygame
-from typing import Any, Callable
-from constants import PLAYER_RADIUS, LINE_WIDTH
-from circleshape import CircleShape
+from typing import Any, Callable, ClassVar
 
 from pydantic_core import CoreSchema, core_schema
-from pydantic import BaseModel, GetCoreSchemaHandler, ValidationError
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    validate_call,
+)
+
+from circleshape import CircleShape
+import pygame
+
+from constants import PlayerDimensions 
+from validationfunctions import SurfaceWrapped
+
+"""
+class PlayerDimensions(BaseModel):
+    player_radius: int = Field(gt=0, default=PLAYER_RADIUS, validate_default=True)
+    line_length: int = Field(gt=0, default=LINE_WIDTH, validate_default=True)
+    model_config = ConfigDict(frozen=True)
+"""
 
 class Player(CircleShape):
-    def __init__(self, x, y):
-        if(not (type(x) == float and type(y) == float)):
-            print(f"{self.__init__.__name__}: x and y must be integers")
-        if(not (type(PLAYER_RADIUS) == int and PLAYER_RADIUS > 0)):
-            print(f"{self.__init__.__name__}: PLAYER_RADIUS must be an int > 0")
+    def __init__(self, x: float, y: float) -> None:
+        assert type(x) == float, "x must be a float"
+        assert type (y) == float, "y must be a float"
 
-        player = super().__init__(x, y, PLAYER_RADIUS)
-        if(not (type(player) == type(None))):
-            print(f"{self.__init__.__name__}: super().__init__ must return None")
+        player = super().__init__(x, y, PlayerDimensions().PLAYER_RADIUS)
+        assert player == None, "super().__init__ must return None"
 
         self.rotation = 0
+
+        return None
 
 
     @classmethod
@@ -25,20 +39,18 @@ class Player(CircleShape):
         return (core_schema.no_info_before_validator_function(cls._validate, schema=core_schema.any_schema(),))
 
     @staticmethod
-    def _validate(v,):
-        if isinstance(v, Player):
-            return v
-        raise TypeError("must be of type Player")
+    def _validate(value):
+        if not isinstance(value, Player):
+            raise ValidationError("must be of type Player")
+        return value
 
-
-    def triangle(self):
+    @validate_call(validate_return=True)
+    def triangle(self) -> list:
         forward = pygame.Vector2(0, 1).rotate(self.rotation)
-        if(not (type(forward) == pygame.Vector2)):
-            print(f"{self.triangle.__name__}: forward: pygame.Vector2.rotate must return a Vector2")
+        assert type(forward) == pygame.Vector2, "pygame.Vector2.rotate must return a Vector2"
 
         right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
-        if(not (type(right) == pygame.Vector2)):
-            print(f"{self.triangle.__name__}: right: pygame.Vector2.rotate must return a Vector2")
+        assert type(right) == pygame.Vector2, "pygame.Vector2.rotate must return a Vector2"
 
         a = self.position + forward * self.radius
         b = self.position - forward * self.radius - right
@@ -46,18 +58,17 @@ class Player(CircleShape):
         return [a, b, c]
 
 
-    def draw(self, screen):
-        if(not (type(screen) == pygame.surface.Surface)):
-            print(f"{self.draw.__name__}: screen must be of type pygame.surface.Surface")
-
+    @validate_call(validate_return=True)
+    def draw(self, screen: SurfaceWrapped) -> None:
         get_player_triangle = self.triangle()
-        if(not (type(get_player_triangle) == list and len(get_player_triangle) == 3
-                and type(get_player_triangle[0]) == pygame.math.Vector2
-                and type(get_player_triangle[1]) == pygame.math.Vector2
-                and type(get_player_triangle[2]) == pygame.math.Vector2)):
-            print(f"{self.draw.__name__}: self.triangle must return a list of 3 integers")
+        assert type(get_player_triangle) == list, "self.triangle must return a list"
+        assert len(get_player_triangle) == 3, "self.triangle must return a list of length 3"
+        assert type(get_player_triangle[0]) == pygame.math.Vector2, "each list index must be a Vector2"
+        assert type(get_player_triangle[1]) == pygame.math.Vector2, "each list index must be a Vector2"
+        assert type(get_player_triangle[2]) == pygame.math.Vector2, "each list index must be a Vector2"
 
-        if(not (type(LINE_WIDTH) == int and LINE_WIDTH > 0)):
-            print(f"{self.draw.__name__}: LINE_WIDTH must be an int > 0")
-        draw_player = pygame.draw.polygon(screen, "white", get_player_triangle, LINE_WIDTH)
+        draw_player = pygame.draw.polygon(screen.object, "white", get_player_triangle, PlayerDimensions().LINE_WIDTH)
+        assert type(draw_player) == pygame.rect.Rect, "pygame.draw.polygon must return type Rect"
+
+        return None
 

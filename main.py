@@ -4,65 +4,21 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    GetCoreSchemaHandler,
     ValidationError,
     field_validator,
-    GetCoreSchemaHandler,
     model_validator,
     validate_call,
 )
 from pydantic_core import CoreSchema, core_schema
 import pygame
 
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import GameArea 
+from validationfunctions import SurfaceWrapped, RectWrapped
 from logger import log_state
 from player import Player
 
-
-class SurfaceWrapped(BaseModel):
-    object: pygame.surface.Surface
-
-    model_config = ConfigDict(arbitrary_types_allowed=True, 
-                              extra="forbid", 
-                              frozen=True, 
-                              validate_assignment=True, 
-                              )
-    
-    @model_validator(mode="before")
-    def accept_raw_surface(cls, data):
-        if not isinstance(data, pygame.surface.Surface):
-            raise ValidationError("SurfaceWrapped must receive a type pygame.Surface or dict key")
-        return {"object": data}
-
-    @field_validator("object")
-    def ensure_instance(cls, value):
-        if not isinstance(value, pygame.surface.Surface):
-            raise ValidationError("must be pygame.surface.Surface")
-        return value
-
-
-class RectWrapped(BaseModel):
-    object: pygame.rect.Rect
-
-    model_config = ConfigDict(arbitrary_types_allowed=True, 
-                              extra="forbid", 
-                              frozen=True, 
-                              validate_assignment=True, 
-                              )
-
-    @model_validator(mode="before")
-    def accept_raw_rect(cls, data):
-        if not isinstance(data, pygame.rect.Rect):
-            raise ValidationError("RectWrapped must receive a type pygame.Surface or dict key")
-        return {"object": data}
-
-
-    @field_validator("object")
-    def ensure_instance(cls, value):
-        if not isinstance(value, pygame.rect.Rect):
-            raise ValidationError("must be pygame.rect.Rect")
-        return value
-
-
+"""
 class GameArea(BaseModel):
     width: int = Field(default=SCREEN_WIDTH,
                        validate_default=True,
@@ -90,14 +46,14 @@ class GameArea(BaseModel):
 
 
 game_area = GameArea() 
-
+"""
 
 @validate_call(validate_return=True)
 def PrintWelcomeMessage() -> None:
     assert pygame.__version__ == "2.6.1", "pygame version must be exactly 2.6.1"
     print(f"Starting Asteroids with pygame version: {pygame.__version__}")
-    print(f"Screen width: {game_area.GetWidth}")
-    print(f"Screen height: {game_area.GetHeight}")
+    print(f"Screen width: {GameArea().SCREEN_WIDTH}")
+    print(f"Screen height: {GameArea().SCREEN_HEIGHT}")
     return None
 
 
@@ -113,7 +69,7 @@ def StartGame() -> None:
 
 @validate_call(validate_return=True)
 def NewPlayerCenter() -> Player:
-    player: Player = Player(game_area.GetWidth / 2, game_area.GetHeight / 2)
+    player: Player = Player(GameArea().SCREEN_WIDTH / 2, GameArea().SCREEN_HEIGHT / 2)
     return player
 
 @validate_call(validate_return=True)
@@ -127,8 +83,8 @@ def FillBackground(screen: SurfaceWrapped, color: str) -> RectWrapped:
     background_size: tuple = pygame.Surface.get_size(unwrapped_screen)
     assert type(background_size) == tuple, "get_size must return type tuple"
     assert len(background_size) == 2, "get_size must return a tuple of length 2"
-    assert background_size[0] == game_area.GetWidth, "screen background width must equal game_area width"
-    assert background_size[1] == game_area.GetHeight, "screen background height must equal game_area height"
+    assert background_size[0] == GameArea().SCREEN_WIDTH, "screen background width must equal game_area width"
+    assert background_size[1] == GameArea().SCREEN_HEIGHT, "screen background height must equal game_area height"
 
     return background
 
@@ -144,7 +100,7 @@ def main():
     assert type(clock) == pygame.time.Clock, "pygame.time.Clock must return type Clock"
     dt: int = 0
 
-    new_screen: pygame.surface.Surface = pygame.display.set_mode((game_area.GetWidth, game_area.GetHeight))
+    new_screen: pygame.surface.Surface = pygame.display.set_mode((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
     assert type(new_screen) == pygame.surface.Surface, "pygame.display.set_mode must return type Surface"
 
     new_player: Player = NewPlayerCenter()
