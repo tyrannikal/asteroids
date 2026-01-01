@@ -1,33 +1,38 @@
+"""Game state and event logging for debugging and analysis."""
+
 import inspect
 import json
 import math
-from datetime import datetime
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any
 
-__all__ = ["log_state", "log_event"]
+from constants import LoggingConstants
 
-_FPS = 60
-_MAX_SECONDS = 16
-_SPRITE_SAMPLE_LIMIT = 10  # Maximum number of sprites to log per group
+__all__ = ["log_event", "log_state"]
 
+
+# pylint: disable=invalid-name  # Module-level state variables intentionally private
 _frame_count = 0
 _state_log_initialized = False
 _event_log_initialized = False
-_start_time = datetime.now()
+_start_time = datetime.now(UTC)
 
 
-def log_state():
-    global _frame_count, _state_log_initialized
+def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-return-statements,too-many-branches
+    """Log current game state by introspecting caller's local variables."""
+    global _frame_count, _state_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
-    # Stop logging after `_MAX_SECONDS` seconds
-    if _frame_count > _FPS * _MAX_SECONDS:
+    # Stop logging after `LoggingConstants().MAX_SECONDS` seconds
+    if _frame_count > LoggingConstants().FPS * LoggingConstants().MAX_SECONDS:
         return
 
     # Take a snapshot approx. once per second
     _frame_count += 1
-    if _frame_count % _FPS != 0:
+    if _frame_count % LoggingConstants().FPS != 0:
         return
 
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     frame = inspect.currentframe()
     if frame is None:
@@ -43,14 +48,17 @@ def log_state():
     game_state = {}
 
     for key, value in local_vars.items():
-        if "pygame" in str(type(value)) and hasattr(value, "get_size"):
+        if "pygame" in str(type(value)) and hasattr(  # pyright: ignore[reportUnknownArgumentType]
+            value,
+            "get_size",
+        ):
             screen_size = value.get_size()
 
         if hasattr(value, "__class__") and "Group" in value.__class__.__name__:
             sprites_data = []
 
             for i, sprite in enumerate(value):
-                if i >= _SPRITE_SAMPLE_LIMIT:
+                if i >= LoggingConstants().SPRITE_SAMPLE_LIMIT:
                     break
 
                 sprite_info = {"type": sprite.__class__.__name__}
@@ -73,11 +81,14 @@ def log_state():
                 if hasattr(sprite, "rotation"):
                     sprite_info["rot"] = round(sprite.rotation, 2)
 
-                sprites_data.append(sprite_info)
+                sprites_data.append(sprite_info)  # pyright: ignore[reportUnknownMemberType]
 
             game_state[key] = {"count": len(value), "sprites": sprites_data}
 
-        if len(game_state) == 0 and hasattr(value, "position"):
+        if len(game_state) == 0 and hasattr(  # pyright: ignore[reportUnknownArgumentType]
+            value,
+            "position",
+        ):
             sprite_info = {"type": value.__class__.__name__}
 
             sprite_info["pos"] = [
@@ -99,7 +110,7 @@ def log_state():
 
             game_state[key] = sprite_info
 
-    entry = {
+    entry = {  # pyright: ignore[reportUnknownVariableType]
         "timestamp": now.strftime("%H:%M:%S.%f")[:-3],
         "elapsed_s": math.floor((now - _start_time).total_seconds()),
         "frame": _frame_count,
@@ -109,16 +120,17 @@ def log_state():
 
     # New log file on each run
     mode = "w" if not _state_log_initialized else "a"
-    with open("game_state.jsonl", mode) as f:
+    with Path("game_state.jsonl").open(mode, encoding="utf-8") as f:
         f.write(json.dumps(entry) + "\n")
 
     _state_log_initialized = True
 
 
-def log_event(event_type, **details):
-    global _event_log_initialized
+def log_event(event_type: str, **details: Any) -> None:  # noqa: ANN401
+    """Log a game event with timestamp and custom details."""
+    global _event_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
-    now = datetime.now()
+    now = datetime.now(UTC)
 
     event = {
         "timestamp": now.strftime("%H:%M:%S.%f")[:-3],
@@ -129,7 +141,7 @@ def log_event(event_type, **details):
     }
 
     mode = "w" if not _event_log_initialized else "a"
-    with open("game_events.jsonl", mode) as f:
+    with Path("game_events.jsonl").open(mode, encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
 
     _event_log_initialized = True

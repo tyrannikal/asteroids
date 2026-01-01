@@ -1,5 +1,10 @@
-import pygame
+"""Pydantic validation wrappers for pygame types."""
+# pylint: disable=c-extension-no-member,no-self-argument
+# Pygame types are C extensions, validators use cls not self
 
+from typing import Any
+
+import pygame
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -10,6 +15,8 @@ from pydantic import (
 
 
 class SurfaceWrapped(BaseModel):
+    """Pydantic wrapper for pygame.Surface with strict validation."""
+
     object: pygame.surface.Surface
 
     model_config = ConfigDict(
@@ -20,19 +27,25 @@ class SurfaceWrapped(BaseModel):
     )
 
     @model_validator(mode="before")
-    def accept_raw_surface(cls, data):
+    def accept_raw_surface(cls, data: Any) -> dict[str, Any]:  # noqa: N805, ANN401
+        """Accept pygame.Surface directly or as dict key."""
         if not isinstance(data, pygame.surface.Surface):
-            raise ValidationError("SurfaceWrapped must receive a type pygame.Surface or dict key")
+            msg = "SurfaceWrapped must receive a type pygame.Surface or dict key"
+            raise ValidationError(msg)
         return {"object": data}
 
     @field_validator("object")
-    def ensure_instance(cls, value):
+    def ensure_instance(cls, value: Any) -> pygame.surface.Surface:  # noqa: N805, ANN401
+        """Ensure the object field is a pygame.Surface instance."""
         if not isinstance(value, pygame.surface.Surface):
-            raise ValidationError("must be pygame.surface.Surface")
+            msg = "must be pygame.surface.Surface"
+            raise ValidationError(msg)
         return value
 
 
 class RectWrapped(BaseModel):
+    """Pydantic wrapper for pygame.Rect with strict validation."""
+
     object: pygame.rect.Rect
 
     model_config = ConfigDict(
@@ -43,13 +56,17 @@ class RectWrapped(BaseModel):
     )
 
     @model_validator(mode="before")
-    def accept_raw_rect(cls, data):
+    def accept_raw_rect(cls, data: Any) -> dict[str, Any]:  # noqa: N805, ANN401
+        """Accept pygame.Rect directly or as dict key."""
         if not isinstance(data, pygame.rect.Rect):
-            raise ValidationError("RectWrapped must receive a type pygame.Surface or dict key")
+            msg = "RectWrapped must receive a type pygame.Surface or dict key"
+            raise ValidationError(msg)
         return {"object": data}
 
     @field_validator("object")
-    def ensure_instance(cls, value):
+    def ensure_instance(cls, value: Any) -> pygame.rect.Rect:  # noqa: N805, ANN401
+        """Ensure the object field is a pygame.Rect instance."""
         if not isinstance(value, pygame.rect.Rect):
-            raise ValidationError("must be pygame.rect.Rect")
+            msg = "must be pygame.rect.Rect"
+            raise ValidationError(msg)
         return value

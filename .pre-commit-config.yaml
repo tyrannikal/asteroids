@@ -1,0 +1,66 @@
+# Pre-commit hooks for Tiger Style compliance
+# Run all validation tools automatically on git commit
+
+repos:
+  # Ruff - Format and lint
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+        name: ruff-lint
+      - id: ruff-format
+        name: ruff-format
+
+  # Mypy - Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        additional_dependencies: [pygame==2.6.1, pydantic]
+        args: [--strict]
+
+  # Local hooks for tools not in pre-commit repos
+  - repo: local
+    hooks:
+      # Pyright - Strict type checking
+      - id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      # Pylint - Code quality
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+
+      # Bandit - Security scanning
+      - id: bandit
+        name: bandit
+        entry: bandit
+        language: system
+        args: [-r, ., -ll, -x, ./.venv/]
+        types: [python]
+        pass_filenames: false
+
+      # Vulture - Dead code detection
+      - id: vulture
+        name: vulture
+        entry: vulture
+        language: system
+        args: [., --min-confidence, "80", --exclude, ".venv"]
+        types: [python]
+        pass_filenames: false
+
+      # Radon - Complexity checking (strict: A grade only)
+      - id: radon
+        name: radon-complexity
+        entry: radon
+        language: system
+        args: [cc, ., -a, -nb, --min, A]
+        types: [python]
+        pass_filenames: false

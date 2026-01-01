@@ -1,12 +1,15 @@
+"""Base class for circular game objects with position and velocity."""
+
 import pygame
 
 
-# Base class for game objects
 class CircleShape(pygame.sprite.Sprite):
+    """Base class for game objects with circular collision detection."""
+
     def __init__(self, x: float, y: float, radius: int) -> None:
-        assert type(x) == float, "x must be a float"
-        assert type(y) == float, "y must be a float"
-        assert type(radius) == int, "radius must be a int"
+        assert isinstance(x, float), "x must be a float"
+        assert isinstance(y, float), "y must be a float"
+        assert isinstance(radius, int), "radius must be an int"
 
         # we will be using this later
         containers = getattr(self, "containers", None)
@@ -19,12 +22,9 @@ class CircleShape(pygame.sprite.Sprite):
         self.velocity: pygame.Vector2 = pygame.Vector2(0, 0)
         self.radius: int = radius
 
-        return None
+    def draw(self, screen: "pygame.Surface") -> None:
+        """Draw the object on the screen. Must be overridden by subclasses."""
 
-    def draw(self, screen):
-        # must override
-        pass
-
-    def update(self, dt):
-        # must override
-        pass
+    def update(self, dt: float) -> None:
+        """Update object state based on delta time. Must be overridden by subclasses."""
+        _ = dt  # Parameter reserved for future use
