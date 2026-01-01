@@ -6,11 +6,11 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.4
     hooks:
+      - id: ruff-format
+        name: ruff-format
       - id: ruff
         args: [--fix]
         name: ruff-lint
-      - id: ruff-format
-        name: ruff-format
 
   # Mypy - Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
