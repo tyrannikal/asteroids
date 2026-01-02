@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "asteroids"
 version = "0.1.0"
@@ -7,6 +11,17 @@ requires-python = ">=3.13"
 dependencies = [
     "pygame==2.6.1",
 ]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=9.0.0",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "freezegun>=1.5.0",
+]
+
+[tool.setuptools]
+py-modules = ["main", "player", "circleshape", "constants", "logger", "validationfunctions"]
 
 [tool.mypy]
 strict = true
@@ -28,6 +43,7 @@ reportUnknownVariableType = true
 [tool.ruff]
 line-length = 100
 target-version = "py313"
+extend-exclude = ["tests"]
 
 [tool.ruff.lint]
 select = ["ALL"]  # Enable all rules, then exclude specific ones
@@ -36,6 +52,13 @@ ignore = [
     "ANN101",  # Missing type for self
     "ANN102",  # Missing type for cls
     "S101", # allow assertions for tiger style, sys.flags.optimize == 0 ensures assertions run
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "ANN401",  # Allow Any in tests
+    "SLF001",  # Allow private member access in tests
+    "PLR2004", # Allow magic values in tests
 ]
 
 [tool.pylint.messages_control]
@@ -48,3 +71,38 @@ max-branches = 12
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--showlocals",
+    "-ra",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-fail-under=90",
+]
+markers = [
+    "unit: Unit tests that don't require pygame initialization",
+    "integration: Tests requiring pygame.init()",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    "*/tests/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

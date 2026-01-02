@@ -42,7 +42,7 @@ class Player(CircleShape):
             raise ValidationError(msg)
         return value
 
-    @validate_call(validate_return=True)
+    @validate_call
     def triangle(self) -> list[pygame.Vector2]:
         """Calculate triangle vertices based on position and rotation."""
         forward: pygame.Vector2 = pygame.Vector2(0, 1).rotate(self.rotation)

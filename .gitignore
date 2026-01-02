@@ -9,5 +9,12 @@ wheels/
 # Virtual environments
 .venv
 
+# Game logs
 game_state.jsonl
+game_events.jsonl
+
+# Test artifacts
+.coverage
+htmlcov/
+.pytest_cache/
 
