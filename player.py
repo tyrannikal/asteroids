@@ -4,7 +4,7 @@
 from typing import Any
 
 import pygame
-from pydantic import ValidationError, validate_call
+from pydantic import validate_call
 from pydantic_core import core_schema
 
 from circleshape import CircleShape
@@ -39,7 +39,7 @@ class Player(CircleShape):
     def _validate(value: Any) -> "Player":  # noqa: ANN401
         if not isinstance(value, Player):
             msg = "must be of type Player"
-            raise ValidationError(msg)
+            raise TypeError(msg)
         return value
 
     @validate_call

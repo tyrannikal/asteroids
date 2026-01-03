@@ -62,17 +62,17 @@ class TestPlayerPydanticValidation:
 
     def test_pydantic_validator_rejects_non_player(self) -> None:
         """Test Player._validate rejects non-Player types."""
-        with pytest.raises(ValidationError, match="must be of type Player"):
+        with pytest.raises(TypeError, match="must be of type Player"):
             Player._validate("not a player")
 
     def test_pydantic_validator_rejects_none(self) -> None:
         """Test Player._validate rejects None."""
-        with pytest.raises(ValidationError, match="must be of type Player"):
+        with pytest.raises(TypeError, match="must be of type Player"):
             Player._validate(None)
 
     def test_pydantic_validator_rejects_int(self) -> None:
         """Test Player._validate rejects integer."""
-        with pytest.raises(ValidationError, match="must be of type Player"):
+        with pytest.raises(TypeError, match="must be of type Player"):
             Player._validate(42)
 
 
@@ -171,8 +171,8 @@ class TestPlayerTriangle:
         player.rotation = 0
         vertices = player.triangle()
 
-        # At rotation 0, back vertices should have same x coordinate as center
-        assert vertices[1].x == pytest.approx(vertices[2].x, abs=0.01)
+        # At rotation 0 (forward points up), back vertices should have same y coordinate
+        assert vertices[1].y == pytest.approx(vertices[2].y, abs=0.01)
 
     def test_triangle_changes_with_rotation(self) -> None:
         """Test triangle updates when rotation changes."""

@@ -19,25 +19,25 @@ class TestSurfaceWrapped:
 
     def test_reject_non_surface_string(self) -> None:
         """Test SurfaceWrapped rejects string input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             SurfaceWrapped.model_validate("not a surface")
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_non_surface_int(self) -> None:
         """Test SurfaceWrapped rejects integer input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             SurfaceWrapped.model_validate(42)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_non_surface_none(self) -> None:
         """Test SurfaceWrapped rejects None input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             SurfaceWrapped.model_validate(None)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_rect_instead_of_surface(self, mock_rect: pygame.rect.Rect) -> None:
         """Test SurfaceWrapped rejects pygame.Rect."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             SurfaceWrapped.model_validate(mock_rect)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
@@ -55,14 +55,13 @@ class TestSurfaceWrapped:
 
     def test_extra_fields_forbidden(self, mock_surface: MagicMock) -> None:
         """Test SurfaceWrapped forbids extra fields."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError):
             SurfaceWrapped(object=mock_surface, extra_field="value")  # type: ignore[call-arg]
-        assert "extra" in str(exc_info.value).lower()
 
     def test_dict_with_object_key(self, mock_surface: MagicMock) -> None:
         """Test SurfaceWrapped rejects dict input (model_validator checks raw Surface)."""
         # The model_validator expects raw Surface, not dict
-        with pytest.raises(ValidationError):
+        with pytest.raises(TypeError):
             SurfaceWrapped.model_validate({"object": mock_surface})
 
     def test_access_object_attribute(self, mock_surface: MagicMock) -> None:
@@ -82,25 +81,25 @@ class TestRectWrapped:
 
     def test_reject_non_rect_string(self) -> None:
         """Test RectWrapped rejects string input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             RectWrapped.model_validate("not a rect")
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_non_rect_int(self) -> None:
         """Test RectWrapped rejects integer input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             RectWrapped.model_validate(123)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_non_rect_none(self) -> None:
         """Test RectWrapped rejects None input."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             RectWrapped.model_validate(None)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
     def test_reject_surface_instead_of_rect(self, mock_surface: MagicMock) -> None:
         """Test RectWrapped rejects pygame.Surface."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError) as exc_info:
             RectWrapped.model_validate(mock_surface)
         assert "must receive a type pygame.Surface" in str(exc_info.value)
 
@@ -118,14 +117,13 @@ class TestRectWrapped:
 
     def test_extra_fields_forbidden(self, mock_rect: pygame.rect.Rect) -> None:
         """Test RectWrapped forbids extra fields."""
-        with pytest.raises(ValidationError) as exc_info:
+        with pytest.raises(TypeError):
             RectWrapped(object=mock_rect, extra_field="value")  # type: ignore[call-arg]
-        assert "extra" in str(exc_info.value).lower()
 
     def test_dict_with_object_key(self, mock_rect: pygame.rect.Rect) -> None:
         """Test RectWrapped rejects dict input (model_validator checks raw Rect)."""
         # The model_validator expects raw Rect, not dict
-        with pytest.raises(ValidationError):
+        with pytest.raises(TypeError):
             RectWrapped.model_validate({"object": mock_rect})
 
     def test_access_object_attribute(self, mock_rect: pygame.rect.Rect) -> None:

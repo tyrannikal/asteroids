@@ -39,6 +39,7 @@ reportMissingTypeStubs = true
 reportUnknownMemberType = true
 reportUnknownArgumentType = true
 reportUnknownVariableType = true
+exclude = ["tests/**", ".venv/**", ".vulture_whitelist.py"]
 
 [tool.ruff]
 line-length = 100

@@ -59,7 +59,7 @@ def fill_background(screen: SurfaceWrapped, color: str) -> RectWrapped:
     background: pygame.rect.Rect = screen.object.fill(color)
 
     assert isinstance(background, pygame.rect.Rect)
-    background_size: tuple[int, int] = pygame.Surface.get_size(screen.object)
+    background_size: tuple[int, int] = screen.object.get_size()
     assert isinstance(background_size, tuple), "get_size must return type tuple"
     width, height = background_size  # Validates exactly 2 elements
     assert width == GameArea().SCREEN_WIDTH, "screen background width must equal game_area width"

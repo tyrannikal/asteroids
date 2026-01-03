@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import mock_open
 
+import freezegun
 import pygame
 from pytest_mock import MockerFixture
 
@@ -46,7 +47,7 @@ class TestLogStateFrameCounting:
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
-        mock_open_func = mocker.patch("builtins.open", mock_open())
+        mock_open_func = mocker.patch("pathlib.Path.open", mock_open())
 
         max_frames = LoggingConstants().FPS * LoggingConstants().MAX_SECONDS
 
@@ -86,14 +87,14 @@ class TestLogStateFileIO:
         mock_frame.f_back.f_locals = {}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
-        mock_open_func = mocker.patch("builtins.open", mock_open())
+        mock_open_func = mocker.patch("pathlib.Path.open", mock_open())
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
 
         # Verify file opened in 'w' mode
         mock_open_func.assert_called_once()
-        assert mock_open_func.call_args[0][1] == "w"
+        assert mock_open_func.call_args[0][0] == "w"
 
     def test_subsequent_writes_use_mode_a(
         self,
@@ -105,7 +106,7 @@ class TestLogStateFileIO:
         mock_frame.f_back.f_locals = {}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
-        mock_open_func = mocker.patch("builtins.open", mock_open())
+        mock_open_func = mocker.patch("pathlib.Path.open", mock_open())
 
         # First call
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
@@ -117,7 +118,7 @@ class TestLogStateFileIO:
 
         # Second call should use 'a' mode
         assert mock_open_func.call_count == 2
-        assert mock_open_func.call_args[0][1] == "a"
+        assert mock_open_func.call_args[0][0] == "a"
 
 
 class TestLogStateIntrospection:
@@ -125,16 +126,17 @@ class TestLogStateIntrospection:
 
     def test_captures_screen_size(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() captures screen size from Surface.get_size()."""
-        mock_surface = mocker.MagicMock()
+        mock_surface = mocker.MagicMock(spec=["get_size"])
         mock_surface.get_size.return_value = (1280, 720)
-        type(mock_surface).__name__ = "Surface"
+        # Make pygame detection work
+        mock_surface.__class__.__module__ = "pygame.surface"
 
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {"screen": mock_surface}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -146,16 +148,16 @@ class TestLogStateIntrospection:
 
     def test_captures_sprite_position(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() captures sprite position attribute."""
-        mock_sprite = mocker.MagicMock()
+        mock_sprite = mocker.MagicMock(spec=["position", "__class__"])
         mock_sprite.position = pygame.Vector2(100.5, 200.75)
-        type(mock_sprite).__name__ = "MockSprite"
+        mock_sprite.__class__.__name__ = "MockSprite"
 
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {"player": mock_sprite}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -167,17 +169,17 @@ class TestLogStateIntrospection:
 
     def test_captures_sprite_velocity(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() captures sprite velocity attribute."""
-        mock_sprite = mocker.MagicMock()
+        mock_sprite = mocker.MagicMock(spec=["position", "velocity", "__class__"])
         mock_sprite.position = pygame.Vector2(0, 0)
         mock_sprite.velocity = pygame.Vector2(5.123, 10.456)
-        type(mock_sprite).__name__ = "Sprite"
+        mock_sprite.__class__.__name__ = "Sprite"
 
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {"obj": mock_sprite}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -188,17 +190,17 @@ class TestLogStateIntrospection:
 
     def test_captures_sprite_radius(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() captures sprite radius attribute."""
-        mock_sprite = mocker.MagicMock()
+        mock_sprite = mocker.MagicMock(spec=["position", "radius", "__class__"])
         mock_sprite.position = pygame.Vector2(0, 0)
         mock_sprite.radius = 20
-        type(mock_sprite).__name__ = "Circle"
+        mock_sprite.__class__.__name__ = "Circle"
 
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {"circle": mock_sprite}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -209,17 +211,17 @@ class TestLogStateIntrospection:
 
     def test_captures_sprite_rotation(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() captures sprite rotation attribute."""
-        mock_sprite = mocker.MagicMock()
+        mock_sprite = mocker.MagicMock(spec=["position", "rotation", "__class__"])
         mock_sprite.position = pygame.Vector2(0, 0)
         mock_sprite.rotation = 45.678
-        type(mock_sprite).__name__ = "Player"
+        mock_sprite.__class__.__name__ = "Player"
 
         mock_frame = mocker.MagicMock()
         mock_frame.f_back.f_locals = {"player": mock_sprite}
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -230,15 +232,15 @@ class TestLogStateIntrospection:
 
     def test_handles_sprite_groups(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() detects and logs pygame.sprite.Group."""
-        mock_sprite1 = mocker.MagicMock()
+        mock_sprite1 = mocker.MagicMock(spec=["position", "__class__"])
         mock_sprite1.position = pygame.Vector2(10, 20)
-        type(mock_sprite1).__name__ = "Asteroid"
+        mock_sprite1.__class__.__name__ = "Asteroid"
 
-        mock_sprite2 = mocker.MagicMock()
+        mock_sprite2 = mocker.MagicMock(spec=["position", "__class__"])
         mock_sprite2.position = pygame.Vector2(30, 40)
-        type(mock_sprite2).__name__ = "Asteroid"
+        mock_sprite2.__class__.__name__ = "Asteroid"
 
-        mock_group = mocker.MagicMock()
+        mock_group = mocker.MagicMock(spec=["__class__", "__iter__", "__len__"])
         mock_group.__class__.__name__ = "Group"
         mock_group.__iter__.return_value = iter([mock_sprite1, mock_sprite2])
         mock_group.__len__.return_value = 2
@@ -248,7 +250,7 @@ class TestLogStateIntrospection:
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -265,12 +267,12 @@ class TestLogStateIntrospection:
         limit = LoggingConstants().SPRITE_SAMPLE_LIMIT
         sprites = []
         for i in range(limit + 5):
-            mock_sprite = mocker.MagicMock()
+            mock_sprite = mocker.MagicMock(spec=["position", "__class__"])
             mock_sprite.position = pygame.Vector2(i, i)
-            type(mock_sprite).__name__ = "Sprite"
+            mock_sprite.__class__.__name__ = "Sprite"
             sprites.append(mock_sprite)
 
-        mock_group = mocker.MagicMock()
+        mock_group = mocker.MagicMock(spec=["__class__", "__iter__", "__len__"])
         mock_group.__class__.__name__ = "Group"
         mock_group.__iter__.return_value = iter(sprites)
         mock_group.__len__.return_value = len(sprites)
@@ -280,7 +282,7 @@ class TestLogStateIntrospection:
         mocker.patch("inspect.currentframe", return_value=mock_frame)
 
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -293,7 +295,7 @@ class TestLogStateIntrospection:
     def test_handles_no_frame(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_state() handles inspect.currentframe() returning None."""
         mocker.patch("inspect.currentframe", return_value=None)
-        mock_open_func = mocker.patch("builtins.open", mock_open())
+        mock_open_func = mocker.patch("pathlib.Path.open", mock_open())
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -306,7 +308,7 @@ class TestLogStateIntrospection:
         mock_frame = mocker.MagicMock()
         mock_frame.f_back = None
         mocker.patch("inspect.currentframe", return_value=mock_frame)
-        mock_open_func = mocker.patch("builtins.open", mock_open())
+        mock_open_func = mocker.patch("pathlib.Path.open", mock_open())
 
         logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
         logger.log_state()
@@ -322,31 +324,27 @@ class TestLogStateTimestamps:
         self,
         clean_logger_state: Any,
         mocker: MockerFixture,
-        freezegun: Any,
     ) -> None:
         """Test timestamp format is HH:MM:SS.mmm."""
         # Freeze time
         frozen_time = datetime(2024, 1, 1, 12, 30, 45, 123000, tzinfo=UTC)
-        freezer = freezegun.freeze_time(frozen_time)
-        freezer.start()
 
-        mock_frame = mocker.MagicMock()
-        mock_frame.f_back.f_locals = {}
-        mocker.patch("inspect.currentframe", return_value=mock_frame)
+        with freezegun.freeze_time(frozen_time):
+            mock_frame = mocker.MagicMock()
+            mock_frame.f_back.f_locals = {}
+            mocker.patch("inspect.currentframe", return_value=mock_frame)
 
-        mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+            mock_file = mocker.mock_open()
+            mocker.patch("pathlib.Path.open", mock_file)
 
-        # Reset start time to frozen time
-        logger._start_time = frozen_time  # type: ignore[attr-defined]
-        logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
-        logger.log_state()
+            # Reset start time to frozen time
+            logger._start_time = frozen_time  # type: ignore[attr-defined]
+            logger._frame_count = LoggingConstants().FPS - 1  # type: ignore[attr-defined]
+            logger.log_state()
 
-        written_data = mock_file().write.call_args[0][0]
-        data = json.loads(written_data.strip())
-        assert data["timestamp"] == "12:30:45.123"
-
-        freezer.stop()
+            written_data = mock_file().write.call_args[0][0]
+            data = json.loads(written_data.strip())
+            assert data["timestamp"] == "12:30:45.123"
 
 
 class TestLogEvent:
@@ -359,22 +357,23 @@ class TestLogEvent:
     ) -> None:
         """Test log_event() creates game_events.jsonl file."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mock_path = mocker.patch("logger.Path")
+        mock_path.return_value.open = mock_file
 
         logger.log_event("test_event")
 
+        # Verify Path was called with correct filename
+        mock_path.assert_called_with("game_events.jsonl")
         mock_file.assert_called_once()
-        call_args = mock_file.call_args
-        assert "game_events.jsonl" in str(call_args[0][0])
 
     def test_first_write_uses_mode_w(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test first log_event() opens file in 'w' mode."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger.log_event("event1")
 
-        assert mock_file.call_args[0][1] == "w"
+        assert mock_file.call_args[0][0] == "w"
 
     def test_subsequent_writes_use_mode_a(
         self,
@@ -383,18 +382,18 @@ class TestLogEvent:
     ) -> None:
         """Test subsequent log_event() opens file in 'a' mode."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger.log_event("event1")
         logger.log_event("event2")
 
         # Second call should use 'a' mode
-        assert mock_file.call_args[0][1] == "a"
+        assert mock_file.call_args[0][0] == "a"
 
     def test_includes_event_type(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_event() includes event_type in output."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger.log_event("collision")
 
@@ -405,7 +404,7 @@ class TestLogEvent:
     def test_includes_custom_details(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test log_event() includes **details kwargs."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger.log_event("score", points=100, player="Alice")
 
@@ -418,7 +417,7 @@ class TestLogEvent:
     def test_jsonl_format(self, clean_logger_state: Any, mocker: MockerFixture) -> None:
         """Test output is valid JSONL."""
         mock_file = mocker.mock_open()
-        mocker.patch("builtins.open", mock_file)
+        mocker.patch("pathlib.Path.open", mock_file)
 
         logger.log_event("test")
 

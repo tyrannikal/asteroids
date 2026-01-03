@@ -8,7 +8,6 @@ import pygame
 from pydantic import (
     BaseModel,
     ConfigDict,
-    ValidationError,
     field_validator,
     model_validator,
 )
@@ -31,7 +30,7 @@ class SurfaceWrapped(BaseModel):
         """Accept pygame.Surface directly or as dict key."""
         if not isinstance(data, pygame.surface.Surface):
             msg = "SurfaceWrapped must receive a type pygame.Surface or dict key"
-            raise ValidationError(msg)
+            raise TypeError(msg)
         return {"object": data}
 
     @field_validator("object")
@@ -39,7 +38,7 @@ class SurfaceWrapped(BaseModel):
         """Ensure the object field is a pygame.Surface instance."""
         if not isinstance(value, pygame.surface.Surface):
             msg = "must be pygame.surface.Surface"
-            raise ValidationError(msg)
+            raise TypeError(msg)
         return value
 
 
@@ -60,7 +59,7 @@ class RectWrapped(BaseModel):
         """Accept pygame.Rect directly or as dict key."""
         if not isinstance(data, pygame.rect.Rect):
             msg = "RectWrapped must receive a type pygame.Surface or dict key"
-            raise ValidationError(msg)
+            raise TypeError(msg)
         return {"object": data}
 
     @field_validator("object")
@@ -68,5 +67,5 @@ class RectWrapped(BaseModel):
         """Ensure the object field is a pygame.Rect instance."""
         if not isinstance(value, pygame.rect.Rect):
             msg = "must be pygame.rect.Rect"
-            raise ValidationError(msg)
+            raise TypeError(msg)
         return value

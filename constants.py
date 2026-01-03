@@ -1,6 +1,6 @@
 """Game constants and configuration with Pydantic validation."""
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # pylint: disable=invalid-name  # These are default literals for Pydantic fields
 screen_width_literal = 1280
@@ -29,6 +29,12 @@ class PlayerDimensions(BaseModel):
     )
     model_config = ConfigDict(frozen=True)
 
+    @field_validator("PLAYER_RADIUS", "LINE_WIDTH", mode="before")
+    @classmethod
+    def convert_to_int(cls, v: float) -> int:
+        """Convert float to int before validation."""
+        return int(v)
+
 
 class GameArea(BaseModel):
     """Game area screen dimensions with validated constraints."""
@@ -44,6 +50,12 @@ class GameArea(BaseModel):
         validate_default=True,
     )
     model_config = ConfigDict(frozen=True)
+
+    @field_validator("SCREEN_WIDTH", "SCREEN_HEIGHT", mode="before")
+    @classmethod
+    def convert_to_int(cls, v: float) -> int:
+        """Convert float to int before validation."""
+        return int(v)
 
 
 class LoggingConstants(BaseModel):
@@ -65,3 +77,9 @@ class LoggingConstants(BaseModel):
         validate_default=True,
     )
     model_config = ConfigDict(frozen=True)
+
+    @field_validator("FPS", "MAX_SECONDS", "SPRITE_SAMPLE_LIMIT", mode="before")
+    @classmethod
+    def convert_to_int(cls, v: float) -> int:
+        """Convert float to int before validation."""
+        return int(v)

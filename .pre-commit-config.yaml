@@ -8,53 +8,68 @@ repos:
     hooks:
       - id: ruff-format
         name: ruff-format
+        exclude: ^\.vulture_whitelist\.py$
       - id: ruff
         args: [--fix]
         name: ruff-lint
+        exclude: ^\.vulture_whitelist\.py$
 
   # Mypy - Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.19.1
     hooks:
       - id: mypy
-        additional_dependencies: [pygame==2.6.1, pydantic]
+        additional_dependencies: [pygame==2.6.1, pydantic, pytest, pytest-mock]
         args: [--strict]
+        exclude: ^(tests/|\.vulture_whitelist\.py)
 
   # Local hooks for tools not in pre-commit repos
   - repo: local
     hooks:
-      # Pyright - Strict type checking
+      # Pyright - Strict type checking (exclude tests - different type patterns)
       - id: pyright
         name: pyright
         entry: pyright
         language: system
         types: [python]
+        exclude: ^(tests/|\.vulture_whitelist\.py$)
         pass_filenames: false
 
-      # Pylint - Code quality
+      # Pylint - Code quality (exclude tests - legitimate test patterns)
       - id: pylint
         name: pylint
         entry: pylint
         language: system
         types: [python]
+        exclude: ^(tests/|\.vulture_whitelist\.py$)
 
-      # Bandit - Security scanning
+      # Bandit - Security scanning (exclude tests - no security concerns)
       - id: bandit
         name: bandit
         entry: bandit
         language: system
-        args: [-r, ., -ll, -x, ./.venv/]
+        args: [-r, ., -ll, -x, "./.venv/,tests/"]
         types: [python]
         pass_filenames: false
 
-      # Vulture - Dead code detection
+      # Vulture - Dead code detection (whitelist for pytest fixture false positives)
       - id: vulture
         name: vulture
         entry: vulture
         language: system
-        args: [., --min-confidence, "80", --exclude, ".venv"]
+        args: [., .vulture_whitelist.py, --min-confidence, "80", --exclude, ".venv"]
         types: [python]
         pass_filenames: false
+
+      # Pytest - Run unit tests with coverage
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        args: [--cov=., --cov-report=term-missing, --cov-fail-under=90, -q]
+        types: [python]
+        pass_filenames: false
+        always_run: true
 
       # Radon - Complexity checking (strict: A grade only)
       - id: radon
