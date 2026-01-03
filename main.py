@@ -25,7 +25,6 @@ if sys.flags.optimize != 0:
 
 @validate_call(validate_return=True)
 def print_welcome_message() -> None:
-    """Print game startup information with version and screen dimensions."""
     assert version.ver == "2.6.1", "pygame version must be exactly 2.6.1"
     sys.stdout.write(f"Starting Asteroids with pygame version: {version.ver}\n")
     sys.stdout.write(f"Screen width: {GameArea().SCREEN_WIDTH}\n")
@@ -34,7 +33,6 @@ def print_welcome_message() -> None:
 
 @validate_call(validate_return=True)
 def start_game() -> None:
-    """Initialize pygame and validate all modules loaded successfully."""
     game_modules: tuple[int, int] = pygame.init()
     assert isinstance(game_modules, tuple), "pygame.init() must return type tuple"
     success_count, failure_count = game_modules  # Validates exactly 2 elements
@@ -44,14 +42,12 @@ def start_game() -> None:
 
 @validate_call(validate_return=True)
 def new_player_center() -> Player:
-    """Create a new player at the center of the screen."""
     player: Player = Player(GameArea().SCREEN_WIDTH / 2, GameArea().SCREEN_HEIGHT / 2)
     return player
 
 
 @validate_call(validate_return=True)
 def fill_background(screen: SurfaceWrapped, color: str) -> RectWrapped:
-    """Fill screen with specified color and validate dimensions."""
     assert (
         color in pygame.colordict.THECOLORS
     ), "background color must be listed in pygame.colordict.THECOLORS"

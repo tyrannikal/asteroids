@@ -11,7 +11,6 @@ class CircleShape(pygame.sprite.Sprite):
         assert isinstance(y, float), "y must be a float"
         assert isinstance(radius, int), "radius must be an int"
 
-        # we will be using this later
         containers = getattr(self, "containers", None)
         if containers is not None:
             super().__init__(containers)
@@ -23,8 +22,7 @@ class CircleShape(pygame.sprite.Sprite):
         self.radius: int = radius
 
     def draw(self, screen: "pygame.Surface") -> None:
-        """Draw the object on the screen. Must be overridden by subclasses."""
+        pass
 
     def update(self, dt: float) -> None:
-        """Update object state based on delta time. Must be overridden by subclasses."""
         _ = dt  # Parameter reserved for future use

@@ -44,7 +44,6 @@ class Player(CircleShape):
 
     @validate_call
     def triangle(self) -> list[pygame.Vector2]:
-        """Calculate triangle vertices based on position and rotation."""
         forward: pygame.Vector2 = pygame.Vector2(0, 1).rotate(self.rotation)
         assert isinstance(forward, pygame.Vector2), "pygame.Vector2.rotate must return a Vector2"
 

@@ -127,7 +127,6 @@ def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-retu
 
 
 def log_event(event_type: str, **details: Any) -> None:  # noqa: ANN401
-    """Log a game event with timestamp and custom details."""
     global _event_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
     now = datetime.now(UTC)

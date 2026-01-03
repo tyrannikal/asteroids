@@ -32,7 +32,6 @@ class PlayerDimensions(BaseModel):
     @field_validator("PLAYER_RADIUS", "LINE_WIDTH", mode="before")
     @classmethod
     def convert_to_int(cls, v: float) -> int:
-        """Convert float to int before validation."""
         return int(v)
 
 
@@ -54,7 +53,6 @@ class GameArea(BaseModel):
     @field_validator("SCREEN_WIDTH", "SCREEN_HEIGHT", mode="before")
     @classmethod
     def convert_to_int(cls, v: float) -> int:
-        """Convert float to int before validation."""
         return int(v)
 
 
@@ -81,5 +79,4 @@ class LoggingConstants(BaseModel):
     @field_validator("FPS", "MAX_SECONDS", "SPRITE_SAMPLE_LIMIT", mode="before")
     @classmethod
     def convert_to_int(cls, v: float) -> int:
-        """Convert float to int before validation."""
         return int(v)

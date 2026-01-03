@@ -27,7 +27,6 @@ class SurfaceWrapped(BaseModel):
 
     @model_validator(mode="before")
     def accept_raw_surface(cls, data: Any) -> dict[str, Any]:  # noqa: N805, ANN401
-        """Accept pygame.Surface directly or as dict key."""
         if not isinstance(data, pygame.surface.Surface):
             msg = "SurfaceWrapped must receive a type pygame.Surface or dict key"
             raise TypeError(msg)
@@ -35,7 +34,6 @@ class SurfaceWrapped(BaseModel):
 
     @field_validator("object")
     def ensure_instance(cls, value: Any) -> pygame.surface.Surface:  # noqa: N805, ANN401
-        """Ensure the object field is a pygame.Surface instance."""
         if not isinstance(value, pygame.surface.Surface):
             msg = "must be pygame.surface.Surface"
             raise TypeError(msg)
@@ -56,7 +54,6 @@ class RectWrapped(BaseModel):
 
     @model_validator(mode="before")
     def accept_raw_rect(cls, data: Any) -> dict[str, Any]:  # noqa: N805, ANN401
-        """Accept pygame.Rect directly or as dict key."""
         if not isinstance(data, pygame.rect.Rect):
             msg = "RectWrapped must receive a type pygame.Surface or dict key"
             raise TypeError(msg)
@@ -64,7 +61,6 @@ class RectWrapped(BaseModel):
 
     @field_validator("object")
     def ensure_instance(cls, value: Any) -> pygame.rect.Rect:  # noqa: N805, ANN401
-        """Ensure the object field is a pygame.Rect instance."""
         if not isinstance(value, pygame.rect.Rect):
             msg = "must be pygame.rect.Rect"
             raise TypeError(msg)
