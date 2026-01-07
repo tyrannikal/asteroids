@@ -8,7 +8,7 @@ from pydantic import validate_call
 from pydantic_core import core_schema
 
 from circleshape import CircleShape
-from constants import PlayerDimensions
+from constants import PLAYER_DIMS
 from validationfunctions import SurfaceWrapped
 
 
@@ -19,9 +19,7 @@ class Player(CircleShape):
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
 
-        player = super().__init__(x, y, PlayerDimensions().PLAYER_RADIUS)  # pylint: disable=assignment-from-no-return
-        assert player is None, "super().__init__ must return None"
-
+        super().__init__(x, y, PLAYER_DIMS.PLAYER_RADIUS)
         self.rotation = 0
 
     @classmethod
@@ -50,26 +48,33 @@ class Player(CircleShape):
         right: pygame.Vector2 = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
         assert isinstance(right, pygame.Vector2), "pygame.Vector2.rotate must return a Vector2"
 
-        a: pygame.Vector2 = self.position + forward * self.radius
-        b: pygame.Vector2 = self.position - forward * self.radius - right
-        c: pygame.Vector2 = self.position - forward * self.radius + right
+        new_triangle = [
+            self.position + forward * self.radius,
+            self.position - forward * self.radius - right,
+            self.position - forward * self.radius + right,
+        ]
+        assert isinstance(new_triangle, list), "new_triangle must be a list"
+        assert len(new_triangle) == 3, "new_triangle must have exactly 3 vertices"
+        assert all(
+            isinstance(v, pygame.Vector2) for v in new_triangle
+        ), "all triangle vertices must be Vector2"
 
-        return [a, b, c]
+        return new_triangle
 
     @validate_call(validate_return=True)
     def draw(self, screen: SurfaceWrapped) -> None:  # type: ignore[override]
         get_player_triangle: list[pygame.Vector2] = self.triangle()
         assert isinstance(get_player_triangle, list), "self.triangle must return a list"
-        point_a, point_b, point_c = get_player_triangle  # Validates exactly 3 elements
-        assert isinstance(point_a, pygame.Vector2), "each list index must be a Vector2"
-        assert isinstance(point_b, pygame.Vector2), "each list index must be a Vector2"
-        assert isinstance(point_c, pygame.Vector2), "each list index must be a Vector2"
+        assert len(get_player_triangle) == 3, "triangle must have exactly 3 vertices"
+        assert all(
+            isinstance(v, pygame.Vector2) for v in get_player_triangle
+        ), "all triangle vertices must be Vector2"
 
         draw_player: pygame.rect.Rect = pygame.draw.polygon(
             screen.object,
             "white",
             get_player_triangle,
-            PlayerDimensions().LINE_WIDTH,
+            PLAYER_DIMS.LINE_WIDTH,
         )
         assert isinstance(
             draw_player,

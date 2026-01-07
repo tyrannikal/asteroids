@@ -61,16 +61,6 @@ repos:
         types: [python]
         pass_filenames: false
 
-      # Pytest - Run unit tests with coverage
-      - id: pytest
-        name: pytest
-        entry: pytest
-        language: system
-        args: [--cov=., --cov-report=term-missing, --cov-fail-under=90, -q]
-        types: [python]
-        pass_filenames: false
-        always_run: true
-
       # Radon - Complexity checking (strict: A grade only)
       - id: radon
         name: radon-complexity
@@ -79,3 +69,13 @@ repos:
         args: [cc, ., -a, -nb, --min, A]
         types: [python]
         pass_filenames: false
+      
+        # Pytest - Run unit tests with coverage
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        args: [--cov=., --cov-report=term-missing, --cov-fail-under=90, -q]
+        types: [python]
+        pass_filenames: false
+        always_run: true

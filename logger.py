@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from constants import LoggingConstants
+from constants import LOG_CONFIG
 
 __all__ = ["log_event", "log_state"]
 
@@ -23,13 +23,13 @@ def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-retu
     """Log current game state by introspecting caller's local variables."""
     global _frame_count, _state_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
-    # Stop logging after `LoggingConstants().MAX_SECONDS` seconds
-    if _frame_count > LoggingConstants().FPS * LoggingConstants().MAX_SECONDS:
+    # Stop logging after `LOG_CONFIG.MAX_SECONDS` seconds
+    if _frame_count > LOG_CONFIG.FPS * LOG_CONFIG.MAX_SECONDS:
         return
 
     # Take a snapshot approx. once per second
     _frame_count += 1
-    if _frame_count % LoggingConstants().FPS != 0:
+    if _frame_count % LOG_CONFIG.FPS != 0:
         return
 
     now = datetime.now(UTC)
@@ -58,7 +58,7 @@ def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-retu
             sprites_data = []
 
             for i, sprite in enumerate(value):
-                if i >= LoggingConstants().SPRITE_SAMPLE_LIMIT:
+                if i >= LOG_CONFIG.SPRITE_SAMPLE_LIMIT:
                     break
 
                 sprite_info = {"type": sprite.__class__.__name__}

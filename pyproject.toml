@@ -66,6 +66,9 @@ ignore = [
     "SLF001",  # Allow private member access in tests
     "PLR2004", # Allow magic values in tests
 ]
+"player.py" = [
+    "PLR2004", # Triangle vertex count (3) is geometric constant, not magic number
+]
 
 [tool.pylint.messages_control]
 max-line-length = 100

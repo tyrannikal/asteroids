@@ -225,7 +225,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -248,7 +248,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -269,7 +269,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -293,7 +293,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -315,7 +315,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -333,7 +333,7 @@ class TestMainLoop:
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
         mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
-        mock_log = mocker.patch("main.log_state")
+        mock_log = mocker.patch("main.log_state", return_value=None)
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -364,7 +364,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -391,7 +391,7 @@ class TestMainLoop:
         mock_quit_event = MagicMock()
         mock_quit_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", side_effect=[[], [mock_quit_event]])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main
@@ -417,7 +417,7 @@ class TestMainLoop:
         mock_quit_event = MagicMock()
         mock_quit_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", side_effect=[[], [mock_quit_event]])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mock_flip = mocker.patch("pygame.display.flip")
 
         from main import main
@@ -442,7 +442,7 @@ class TestMainLoop:
         mock_event = MagicMock()
         mock_event.type = pygame.QUIT
         mocker.patch("pygame.event.get", return_value=[mock_event])
-        mocker.patch("main.log_state")
+        mocker.patch("main.log_state", return_value=None)
         mocker.patch("pygame.display.flip")
 
         from main import main

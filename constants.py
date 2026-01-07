@@ -80,3 +80,9 @@ class LoggingConstants(BaseModel):
     @classmethod
     def convert_to_int(cls, v: float) -> int:
         return int(v)
+
+
+# Module-level singleton instances (immutable, validated constants)
+PLAYER_DIMS = PlayerDimensions()
+GAME_AREA = GameArea()
+LOG_CONFIG = LoggingConstants()
