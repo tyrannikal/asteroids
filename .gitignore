@@ -9,6 +9,9 @@ wheels/
 # Virtual environments
 .venv
 
+# Dev layouts
+layout.kdl
+
 # Game logs
 game_state.jsonl
 game_events.jsonl

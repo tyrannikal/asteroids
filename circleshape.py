@@ -22,7 +22,7 @@ class CircleShape(pygame.sprite.Sprite):
         self.radius: int = radius
 
     def draw(self, screen: "pygame.Surface") -> None:
-        pass
+        _ = screen  # Abstract method - to be implemented by subclasses
 
     def update(self, dt: float) -> None:
-        _ = dt  # Parameter reserved for future use
+        _ = dt  # Abstract method - to be implemented by subclasses

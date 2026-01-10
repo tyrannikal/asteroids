@@ -15,7 +15,7 @@ from validationfunctions import RectWrapped, SurfaceWrapped
 
 # Tiger Style requirement: Ensure assertions are never disabled
 if sys.flags.optimize != 0:
-    msg = (  # pylint: disable=invalid-name  # Error message variable
+    msg = (  # pylint: disable=invalid-name  # Module-level assignment in guard clause
         "Python optimization mode detected (-O or -OO flag). "
         "Assertions are REQUIRED for Tiger Style compliance. "
         "Never run in optimized mode."
@@ -74,7 +74,7 @@ def main() -> None:
 
     clock: pygame.time.Clock = pygame.time.Clock()
     assert isinstance(clock, pygame.time.Clock), "pygame.time.Clock must return type Clock"
-    _dt: float = 0.0  # Reserved for future game logic
+    dt: float = 0.0
 
     new_screen: pygame.surface.Surface = pygame.display.set_mode(
         (GAME_AREA.SCREEN_WIDTH, GAME_AREA.SCREEN_HEIGHT),
@@ -103,6 +103,9 @@ def main() -> None:
         background: RectWrapped = fill_background(wrapped_screen, "black")
         assert isinstance(background, RectWrapped), "fill_background must return type RectWrapped"
 
+        update_player: None = new_player.update(dt)
+        assert update_player is None, "update_player must return type None"
+
         draw_player: None = new_player.draw(wrapped_screen)
         assert draw_player is None, "player.draw must return type None"
 
@@ -111,7 +114,7 @@ def main() -> None:
         tick: int = clock.tick(60)
         assert isinstance(tick, int), "clock.tick must return type int"
         assert tick >= 0, "clock.tick must return an integer >= 0"
-        _dt = tick / 1000  # Reserved for future game logic
+        dt = tick / 1000
 
 
 if __name__ == "__main__":

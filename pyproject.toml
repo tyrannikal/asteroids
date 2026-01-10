@@ -55,9 +55,8 @@ extend-exclude = ["tests"]
 select = ["ALL"]  # Enable all rules, then exclude specific ones
 ignore = [
     "D",    # pydocstring (unless you want enforced docstrings)
-    "ANN101",  # Missing type for self
-    "ANN102",  # Missing type for cls
     "S101", # allow assertions for tiger style, sys.flags.optimize == 0 ensures assertions run
+    "RET501",  # Allow explicit return None (Tiger Style preference)
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -79,8 +78,8 @@ disable = [
 ]
 max-args = 5
 max-locals = 15
-max-returns = 3
-max-branches = 12
+max-returns = 6
+max-branches = 20
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests"]

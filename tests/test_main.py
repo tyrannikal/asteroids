@@ -384,6 +384,7 @@ class TestMainLoop:
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
         mock_player = MagicMock(spec=Player)
+        mock_player.update.return_value = None
         mock_player.draw.return_value = None
         mocker.patch("main.new_player_center", return_value=mock_player)
 
@@ -410,6 +411,7 @@ class TestMainLoop:
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
         mock_player = MagicMock(spec=Player)
+        mock_player.update.return_value = None
         mock_player.draw.return_value = None
         mocker.patch("main.new_player_center", return_value=mock_player)
 

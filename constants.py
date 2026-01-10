@@ -7,6 +7,7 @@ screen_width_literal = 1280
 screen_height_literal = 720
 
 player_radius_literal = 20
+player_turn_speed_literal = 300
 line_width_literal = 2
 
 fps_literal = 60
@@ -25,6 +26,11 @@ class PlayerDimensions(BaseModel):
     LINE_WIDTH: int = Field(
         gt=0,
         default=line_width_literal,
+        validate_default=True,
+    )
+    PLAYER_TURN_SPEED: int = Field(
+        gt=0,
+        default=player_turn_speed_literal,
         validate_default=True,
     )
     model_config = ConfigDict(frozen=True)

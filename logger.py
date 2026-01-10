@@ -19,7 +19,7 @@ _event_log_initialized = False
 _start_time = datetime.now(UTC)
 
 
-def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-return-statements,too-many-branches
+def log_state() -> None:  # noqa: C901, PLR0912
     """Log current game state by introspecting caller's local variables."""
     global _frame_count, _state_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
@@ -124,6 +124,7 @@ def log_state() -> None:  # noqa: C901, PLR0912  # pylint: disable=too-many-retu
         f.write(json.dumps(entry) + "\n")
 
     _state_log_initialized = True
+    return
 
 
 def log_event(event_type: str, **details: Any) -> None:  # noqa: ANN401

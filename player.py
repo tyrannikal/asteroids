@@ -1,5 +1,5 @@
 """Player class with triangle rendering and Pydantic validation."""
-# pylint: disable=c-extension-no-member  # Pygame uses C extensions
+# pylint: disable=c-extension-no-member,no-member  # Pygame uses C extensions
 
 from typing import Any
 
@@ -20,7 +20,7 @@ class Player(CircleShape):
         assert isinstance(y, float), "y must be a float"
 
         super().__init__(x, y, PLAYER_DIMS.PLAYER_RADIUS)
-        self.rotation = 0
+        self.rotation: float = 0
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -80,3 +80,22 @@ class Player(CircleShape):
             draw_player,
             pygame.rect.Rect,
         ), "pygame.draw.polygon must return type Rect"
+
+    @validate_call(validate_return=True)
+    def rotate(self, dt: float) -> None:
+        self.rotation += PLAYER_DIMS.PLAYER_TURN_SPEED * dt
+
+    @validate_call(validate_return=True)
+    def update(self, dt: float) -> None:
+        keys = pygame.key.get_pressed()
+        assert isinstance(
+            keys,
+            pygame.key.ScancodeWrapper,
+        ), "pygame.key.get_pressed must return a ScancodeWrapper"
+        assert isinstance(keys[pygame.K_a], bool), "keys[pygame.K_a] must be a bool"
+        assert isinstance(keys[pygame.K_d], bool), "keys[pygame.K_d] must be a bool"
+
+        if keys[pygame.K_a]:
+            self.rotate(dt)
+        if keys[pygame.K_d]:
+            self.rotate(dt * -1)

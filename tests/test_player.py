@@ -317,3 +317,289 @@ class TestPlayerDraw:
         call_args = mock_polygon.call_args
         vertices = call_args[0][2]
         assert len(vertices) == 3
+
+
+class TestPlayerRotate:
+    """Tests for Player rotate method."""
+
+    def test_rotate_positive_dt_increases_rotation(self) -> None:
+        """Test rotate with positive dt increases rotation."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.rotate(1.0)
+
+        # PLAYER_TURN_SPEED is 300, so rotation should increase by 300 * 1.0 = 300
+        assert player.rotation == pytest.approx(300.0, abs=0.01)
+
+    def test_rotate_negative_dt_decreases_rotation(self) -> None:
+        """Test rotate with negative dt decreases rotation."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.rotate(-1.0)
+
+        # rotation should decrease by 300 * -1.0 = -300
+        assert player.rotation == pytest.approx(-300.0, abs=0.01)
+
+    def test_rotate_zero_dt_no_change(self) -> None:
+        """Test rotate with zero dt makes no change."""
+        player = Player(100.0, 100.0)
+        player.rotation = 45
+        player.rotate(0.0)
+
+        assert player.rotation == pytest.approx(45.0, abs=0.01)
+
+    def test_rotate_small_dt(self) -> None:
+        """Test rotate with small dt value (typical frame time)."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        # Typical 60fps frame time is ~0.0167 seconds
+        player.rotate(0.0167)
+
+        # 300 * 0.0167 = 5.01 degrees
+        assert player.rotation == pytest.approx(5.01, abs=0.01)
+
+    def test_rotate_accumulation(self) -> None:
+        """Test multiple rotate calls accumulate correctly."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+
+        player.rotate(0.1)  # +30 degrees
+        player.rotate(0.1)  # +30 degrees
+        player.rotate(0.1)  # +30 degrees
+
+        assert player.rotation == pytest.approx(90.0, abs=0.01)
+
+    def test_rotate_from_non_zero_initial(self) -> None:
+        """Test rotate from non-zero starting rotation."""
+        player = Player(100.0, 100.0)
+        player.rotation = 45
+        player.rotate(0.5)  # +150 degrees
+
+        assert player.rotation == pytest.approx(195.0, abs=0.01)
+
+    def test_rotate_beyond_360(self) -> None:
+        """Test rotation can exceed 360 degrees."""
+        player = Player(100.0, 100.0)
+        player.rotation = 350
+        player.rotate(1.0)  # +300 degrees
+
+        # Should be 650, not wrapped
+        assert player.rotation == pytest.approx(650.0, abs=0.01)
+
+    def test_rotate_negative_rotation(self) -> None:
+        """Test rotation can go negative."""
+        player = Player(100.0, 100.0)
+        player.rotation = 10
+        player.rotate(-1.0)  # -300 degrees
+
+        assert player.rotation == pytest.approx(-290.0, abs=0.01)
+
+    def test_rotate_large_dt(self) -> None:
+        """Test rotate with large dt value."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.rotate(10.0)
+
+        assert player.rotation == pytest.approx(3000.0, abs=0.01)
+
+    def test_rotate_returns_none(self) -> None:
+        """Test rotate returns None."""
+        player = Player(100.0, 100.0)
+        result = player.rotate(1.0)
+
+        assert result is None
+
+    def test_rotate_uses_player_turn_speed(self) -> None:
+        """Test rotate uses PLAYER_TURN_SPEED constant."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        expected_speed = PlayerDimensions().PLAYER_TURN_SPEED
+        player.rotate(1.0)
+
+        assert player.rotation == pytest.approx(float(expected_speed), abs=0.01)
+
+    def test_rotate_with_validation_error_non_float(self) -> None:
+        """Test rotate raises ValidationError for non-float dt."""
+        player = Player(100.0, 100.0)
+
+        with pytest.raises(ValidationError):
+            player.rotate("not a float")  # type: ignore[arg-type]
+
+
+class TestPlayerUpdate:
+    """Tests for Player update method with keyboard input."""
+
+    def test_update_a_key_rotates_left(self, mocker: MockerFixture) -> None:
+        """Test pressing 'a' key rotates player counter-clockwise."""
+        # Create a proper mock ScancodeWrapper that behaves like a dict
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.update(0.1)
+
+        # Should rotate by PLAYER_TURN_SPEED * dt = 300 * 0.1 = 30 degrees
+        assert player.rotation == pytest.approx(30.0, abs=0.01)
+
+    def test_update_d_key_rotates_right(self, mocker: MockerFixture) -> None:
+        """Test pressing 'd' key rotates player clockwise."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_d
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.update(0.1)
+
+        # Should rotate by PLAYER_TURN_SPEED * -dt = 300 * -0.1 = -30 degrees
+        assert player.rotation == pytest.approx(-30.0, abs=0.01)
+
+    def test_update_both_keys_cancel_out(self, mocker: MockerFixture) -> None:
+        """Test pressing both 'a' and 'd' keys applies both rotations."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key in (pygame.K_a, pygame.K_d)
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.update(0.1)
+
+        # Both rotations applied: +30 and -30 = 0
+        assert player.rotation == pytest.approx(0.0, abs=0.01)
+
+    def test_update_no_keys_no_rotation(self, mocker: MockerFixture) -> None:
+        """Test no keys pressed results in no rotation."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 45
+        player.update(0.1)
+
+        # Rotation should remain unchanged
+        assert player.rotation == pytest.approx(45.0, abs=0.01)
+
+    def test_update_other_keys_ignored(self, mocker: MockerFixture) -> None:
+        """Test other keys don't affect rotation."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key in (pygame.K_w, pygame.K_s, pygame.K_SPACE)
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 100
+        player.update(0.1)
+
+        # Rotation should remain unchanged
+        assert player.rotation == pytest.approx(100.0, abs=0.01)
+
+    def test_update_zero_dt(self, mocker: MockerFixture) -> None:
+        """Test update with zero dt causes no rotation even with keys pressed."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 50
+        player.update(0.0)
+
+        # No time passed, so no rotation
+        assert player.rotation == pytest.approx(50.0, abs=0.01)
+
+    def test_update_large_dt(self, mocker: MockerFixture) -> None:
+        """Test update with large dt value."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.update(5.0)
+
+        # 300 * 5.0 = 1500 degrees
+        assert player.rotation == pytest.approx(1500.0, abs=0.01)
+
+    def test_update_negative_dt(self, mocker: MockerFixture) -> None:
+        """Test update with negative dt (time reversal scenario)."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+        player.update(-0.1)
+
+        # 300 * -0.1 = -30 degrees (reverses rotation direction)
+        assert player.rotation == pytest.approx(-30.0, abs=0.01)
+
+    def test_update_returns_none(self, mocker: MockerFixture) -> None:
+        """Test update returns None."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        result = player.update(0.1)
+
+        assert result is None
+
+    def test_update_calls_get_pressed(self, mocker: MockerFixture) -> None:
+        """Test update calls pygame.key.get_pressed."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mock_get_pressed = mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.update(0.1)
+
+        mock_get_pressed.assert_called_once()
+
+    def test_update_multiple_frames_accumulate(self, mocker: MockerFixture) -> None:
+        """Test multiple update calls accumulate rotation correctly."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+
+        # Simulate 3 frames at 60fps (~0.0167s each)
+        player.update(0.0167)
+        player.update(0.0167)
+        player.update(0.0167)
+
+        # 300 * 0.0167 * 3 = ~15.03 degrees
+        assert player.rotation == pytest.approx(15.03, abs=0.1)
+
+    def test_update_alternating_keys(self, mocker: MockerFixture) -> None:
+        """Test alternating between a and d keys."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0
+
+        # Press 'a'
+        mock_keys_a = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys_a.__getitem__ = lambda self, key: key == pygame.K_a
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys_a)
+        player.update(0.1)  # +30 degrees
+
+        # Press 'd'
+        mock_keys_d = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys_d.__getitem__ = lambda self, key: key == pygame.K_d
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys_d)
+        player.update(0.1)  # -30 degrees
+
+        # Should be back to 0
+        assert player.rotation == pytest.approx(0.0, abs=0.01)
+
+    def test_update_with_validation_error_non_float(self, mocker: MockerFixture) -> None:
+        """Test update raises ValidationError for non-float dt."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+
+        with pytest.raises(ValidationError):
+            player.update("not a float")  # type: ignore[arg-type]
