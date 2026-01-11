@@ -87,8 +87,28 @@ def main() -> None:
     wrapped_screen: SurfaceWrapped = SurfaceWrapped.model_validate(new_screen)
     assert isinstance(wrapped_screen, SurfaceWrapped), "model_validate must return SurfaceWrapped"
 
+    # pylint: disable=line-too-long
+    updatable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
+        pygame.sprite.Group()
+    )
+    assert isinstance(updatable, pygame.sprite.Group), "updatable must be a Group"
+
+    drawable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
+        pygame.sprite.Group()
+    )
+    # pylint: enable=line-too-long
+    assert isinstance(drawable, pygame.sprite.Group), "drawable must be a Group"
+
+    Player.containers = (updatable, drawable)  # type: ignore[attr-defined]
+
     new_player: Player = new_player_center()
     assert isinstance(new_player, Player), "new_player_center() must return type Player"
+    assert (
+        updatable.has(new_player)  # pyright: ignore[reportUnknownMemberType]
+    ), "updatable must contain new_player"
+    assert (
+        drawable.has(new_player)  # pyright: ignore[reportUnknownMemberType]
+    ), "drawable must contain new_player"
 
     while True:
         log_state_return: None = log_state()  # type: ignore[func-returns-value]
@@ -103,11 +123,11 @@ def main() -> None:
         background: RectWrapped = fill_background(wrapped_screen, "black")
         assert isinstance(background, RectWrapped), "fill_background must return type RectWrapped"
 
-        update_player: None = new_player.update(dt)
-        assert update_player is None, "update_player must return type None"
+        updatable.update(dt)
 
-        draw_player: None = new_player.draw(wrapped_screen)
-        assert draw_player is None, "player.draw must return type None"
+        player_item: Player
+        for player_item in drawable:  # pyright: ignore[reportUnknownVariableType]
+            player_item.draw(wrapped_screen)  # pyright: ignore[reportUnknownMemberType]
 
         pygame.display.flip()
 

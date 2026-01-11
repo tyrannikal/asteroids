@@ -219,7 +219,6 @@ class TestMainLoop:
         # Use real Surface from pygame
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -242,7 +241,6 @@ class TestMainLoop:
         # Don't mock Clock, let it be real
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -263,7 +261,6 @@ class TestMainLoop:
 
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mock_display = mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -287,7 +284,10 @@ class TestMainLoop:
 
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mock_player = mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
+
+        # Spy on new_player_center to verify it's called while keeping real implementation
+        import main as main_module
+        mock_new_player = mocker.spy(main_module, "new_player_center")
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -300,7 +300,7 @@ class TestMainLoop:
 
         main()
 
-        mock_player.assert_called_once()
+        mock_new_player.assert_called_once()
 
     def test_main_event_loop_processes_quit(self, mocker: MockerFixture, mock_pygame_init: None) -> None:
         """Test main() returns on pygame.QUIT event."""
@@ -309,7 +309,6 @@ class TestMainLoop:
 
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
         # Mock QUIT event
         mock_event = MagicMock()
@@ -331,7 +330,6 @@ class TestMainLoop:
 
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
-        mocker.patch("main.new_player_center", return_value=MagicMock(spec=Player))
 
         mock_log = mocker.patch("main.log_state", return_value=None)
 
@@ -356,9 +354,6 @@ class TestMainLoop:
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
-        mock_player = MagicMock(spec=Player)
-        mock_player.draw.return_value = None
-        mocker.patch("main.new_player_center", return_value=mock_player)
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -376,17 +371,20 @@ class TestMainLoop:
         # but if main() completes without error, fill_background() was called successfully
 
     def test_main_draws_player_each_frame(self, mocker: MockerFixture, mock_pygame_init: None) -> None:
-        """Test main() calls player.draw() each iteration."""
+        """Test main() draws player each iteration via sprite groups."""
         mocker.patch("main.print_welcome_message", return_value=None)
         mocker.patch("main.start_game", return_value=None)
 
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
-        mock_player = MagicMock(spec=Player)
-        mock_player.update.return_value = None
-        mock_player.draw.return_value = None
-        mocker.patch("main.new_player_center", return_value=mock_player)
+        # Mock pygame.key.get_pressed since video system isn't initialized
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__.return_value = False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        # Spy on Player.draw to verify it's called
+        mock_draw = mocker.spy(Player, "draw")
 
         # Let one iteration complete, then quit on second iteration
         mock_quit_event = MagicMock()
@@ -399,8 +397,8 @@ class TestMainLoop:
 
         main()
 
-        # Verify player.draw was called
-        mock_player.draw.assert_called_once()
+        # Verify Player.draw was called (via sprite group iteration)
+        mock_draw.assert_called_once()
 
     def test_main_flips_display(self, mocker: MockerFixture, mock_pygame_init: None) -> None:
         """Test main() calls pygame.display.flip()."""
@@ -410,10 +408,10 @@ class TestMainLoop:
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
-        mock_player = MagicMock(spec=Player)
-        mock_player.update.return_value = None
-        mock_player.draw.return_value = None
-        mocker.patch("main.new_player_center", return_value=mock_player)
+        # Mock pygame.key.get_pressed since video system isn't initialized
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__.return_value = False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         # Let one iteration complete, then quit on second iteration
         mock_quit_event = MagicMock()
@@ -436,9 +434,6 @@ class TestMainLoop:
         real_surface = pygame.Surface((GameArea().SCREEN_WIDTH, GameArea().SCREEN_HEIGHT))
         mocker.patch("pygame.display.set_mode", return_value=real_surface)
 
-        mock_player = MagicMock(spec=Player)
-        mock_player.draw.return_value = None
-        mocker.patch("main.new_player_center", return_value=mock_player)
 
         # Mock event loop to exit immediately
         mock_event = MagicMock()
@@ -451,3 +446,74 @@ class TestMainLoop:
 
         # If clock.tick wasn't called properly, assertions in main() would fail
         main()
+
+
+class TestSpriteGroups:
+    """Tests for sprite group initialization and integration."""
+
+    def test_player_added_to_groups_via_containers(self, mocker: MockerFixture) -> None:
+        """Test Player instances are automatically added to groups when containers is set."""
+        # Create sprite groups
+        updatable = pygame.sprite.Group()
+        drawable = pygame.sprite.Group()
+
+        # Set containers
+        Player.containers = (updatable, drawable)
+
+        # Create a player
+        player = Player(100.0, 200.0)
+
+        # Verify player is in both groups
+        assert updatable.has(player)
+        assert drawable.has(player)
+        assert len(updatable) == 1
+        assert len(drawable) == 1
+
+        # Clean up
+        Player.containers = ()
+
+    def test_group_update_calls_sprite_update(self, mocker: MockerFixture) -> None:
+        """Test that calling group.update() calls update on all sprites."""
+        # Create sprite groups
+        updatable = pygame.sprite.Group()
+        drawable = pygame.sprite.Group()
+        Player.containers = (updatable, drawable)
+
+        # Create player and spy on its update method
+        player = Player(100.0, 200.0)
+        mock_update = mocker.spy(player, "update")
+
+        # Mock pygame.key.get_pressed to avoid video system requirement
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__.return_value = False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        # Call group update
+        updatable.update(0.016)
+
+        # Verify player.update was called with dt
+        mock_update.assert_called_once_with(0.016)
+
+        # Clean up
+        Player.containers = ()
+
+    def test_drawable_group_iteration(self, mocker: MockerFixture) -> None:
+        """Test iterating over drawable group yields player sprites."""
+        # Create sprite groups
+        updatable = pygame.sprite.Group()
+        drawable = pygame.sprite.Group()
+        Player.containers = (updatable, drawable)
+
+        # Create two players
+        player1 = Player(100.0, 200.0)
+        player2 = Player(300.0, 400.0)
+
+        # Iterate and collect sprites
+        sprites = list(drawable)
+
+        assert len(sprites) == 2
+        assert player1 in sprites
+        assert player2 in sprites
+
+        # Clean up
+        Player.containers = ()
