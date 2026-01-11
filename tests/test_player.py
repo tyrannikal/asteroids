@@ -489,7 +489,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 100
+        player.rotation = 100.0
         player.update(0.1)
 
         # Rotation should remain unchanged

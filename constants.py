@@ -8,8 +8,9 @@ screen_height_literal = 720
 
 player_radius_literal = 20
 player_turn_speed_literal = 300
-line_width_literal = 2
+player_speed_literal = 200
 
+line_width_literal = 2
 fps_literal = 60
 max_seconds_literal = 16
 sprite_sample_limit_literal = 10  # Maximum number of sprites to log per group
@@ -33,6 +34,7 @@ class PlayerDimensions(BaseModel):
         default=player_turn_speed_literal,
         validate_default=True,
     )
+    PLAYER_SPEED: int = Field(gt=0, default=player_speed_literal, validate_default=True)
     model_config = ConfigDict(frozen=True)
 
     @field_validator("PLAYER_RADIUS", "LINE_WIDTH", mode="before")

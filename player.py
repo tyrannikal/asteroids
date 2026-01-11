@@ -99,3 +99,25 @@ class Player(CircleShape):
             self.rotate(dt)
         if keys[pygame.K_d]:
             self.rotate(dt * -1)
+        if keys[pygame.K_w]:
+            self.move(dt)
+        if keys[pygame.K_s]:
+            self.move(dt * -1)
+
+    def move(self, dt: float) -> None:
+        unit_vector = pygame.Vector2(0, 1)
+        assert isinstance(unit_vector, pygame.Vector2), "unit_vector must return Vector2"
+
+        assert isinstance(self.rotation, float), "self.rotation must be a float"
+        rotated_vector = unit_vector.rotate(self.rotation)
+        assert isinstance(rotated_vector, pygame.Vector2), "rotated_vector must return Vector2"
+
+        assert isinstance(dt, float), "dt must be a float"
+        rotated_with_speed_vector = rotated_vector * PLAYER_DIMS.PLAYER_SPEED * dt
+        assert isinstance(
+            rotated_with_speed_vector,
+            pygame.Vector2,
+        ), "rotated_with_speed_vector must return Vector2"
+
+        self.position += rotated_with_speed_vector
+        assert isinstance(self.position, pygame.Vector2), "self.position must be a Vector2"
