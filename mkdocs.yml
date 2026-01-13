@@ -51,6 +51,8 @@ nav:
   - API Reference:
       - Main: api/main.md
       - Player: api/player.md
+      - Asteroid: api/asteroid.md
+      - AsteroidField: api/asteroidfield.md
       - CircleShape: api/circleshape.md
       - Constants: api/constants.md
       - Logger: api/logger.md

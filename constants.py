@@ -10,6 +10,11 @@ player_radius_literal = 20
 player_turn_speed_literal = 300
 player_speed_literal = 200
 
+asteroid_min_radius_literal = 20
+asteroid_kinds_literal = 3
+asteroid_spawn_rate_seconds_literal = 0.8
+asteroid_max_radius_literal = asteroid_min_radius_literal * asteroid_kinds_literal
+
 line_width_literal = 2
 fps_literal = 60
 max_seconds_literal = 16
@@ -34,10 +39,56 @@ class PlayerDimensions(BaseModel):
         default=player_turn_speed_literal,
         validate_default=True,
     )
-    PLAYER_SPEED: int = Field(gt=0, default=player_speed_literal, validate_default=True)
+    PLAYER_SPEED: int = Field(
+        gt=0,
+        default=player_speed_literal,
+        validate_default=True,
+    )
     model_config = ConfigDict(frozen=True)
 
-    @field_validator("PLAYER_RADIUS", "LINE_WIDTH", mode="before")
+    @field_validator(
+        "PLAYER_RADIUS",
+        "LINE_WIDTH",
+        "PLAYER_TURN_SPEED",
+        "PLAYER_SPEED",
+        mode="before",
+    )
+    @classmethod
+    def convert_to_int(cls, v: float) -> int:
+        return int(v)
+
+
+class AsteroidStats(BaseModel):
+    """Asteroid stats with validated constraints."""
+
+    ASTEROID_MIN_RADIUS: int = Field(
+        gt=0,
+        default=asteroid_min_radius_literal,
+        validate_default=True,
+    )
+    ASTEROID_KINDS: int = Field(
+        gt=0,
+        default=asteroid_kinds_literal,
+        validate_default=True,
+    )
+    ASTEROID_SPAWN_RATE_SECONDS: float = Field(
+        gt=0,
+        default=asteroid_spawn_rate_seconds_literal,
+        validate_default=True,
+    )
+    ASTEROID_MAX_RADIUS: int = Field(
+        gt=0,
+        default=asteroid_max_radius_literal,
+        validate_default=True,
+    )
+    model_config = ConfigDict(frozen=True)
+
+    @field_validator(
+        "ASTEROID_MIN_RADIUS",
+        "ASTEROID_KINDS",
+        "ASTEROID_SPAWN_RATE_SECONDS",
+        "ASTEROID_MAX_RADIUS",
+    )
     @classmethod
     def convert_to_int(cls, v: float) -> int:
         return int(v)
@@ -92,5 +143,6 @@ class LoggingConstants(BaseModel):
 
 # Module-level singleton instances (immutable, validated constants)
 PLAYER_DIMS = PlayerDimensions()
+ASTEROID_STATS = AsteroidStats()
 GAME_AREA = GameArea()
 LOG_CONFIG = LoggingConstants()

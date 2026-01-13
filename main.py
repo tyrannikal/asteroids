@@ -8,6 +8,8 @@ import pygame
 from pydantic import validate_call
 from pygame import version
 
+from asteroid import Asteroid
+from asteroidfield import AsteroidField
 from constants import GAME_AREA
 from logger import log_state
 from player import Player
@@ -99,7 +101,13 @@ def main() -> None:
     # pylint: enable=line-too-long
     assert isinstance(drawable, pygame.sprite.Group), "drawable must be a Group"
 
+    asteroids: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
+    # pylint: enable=line-too-long
+    assert isinstance(asteroids, pygame.sprite.Group), "asteroids must be a Group"
+
     Player.containers = (updatable, drawable)  # type: ignore[attr-defined]
+    Asteroid.containers = (asteroids, updatable, drawable)  # type: ignore[attr-defined]
+    AsteroidField.containers = (updatable,)
 
     new_player: Player = new_player_center()
     assert isinstance(new_player, Player), "new_player_center() must return type Player"
@@ -109,6 +117,15 @@ def main() -> None:
     assert (
         drawable.has(new_player)  # pyright: ignore[reportUnknownMemberType]
     ), "drawable must contain new_player"
+
+    new_asteroid_field: AsteroidField = AsteroidField()
+    assert isinstance(
+        new_asteroid_field,
+        AsteroidField,
+    ), "new_asteroid_field must be an AsteroidField"
+    assert (
+        updatable.has(new_asteroid_field)  # pyright: ignore[reportUnknownMemberType]
+    ), "updatable must contain new_asteroid_field"
 
     while True:
         log_state_return: None = log_state()  # type: ignore[func-returns-value]

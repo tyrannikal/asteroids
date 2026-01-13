@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "pygame==2.6.1",
+    "pydantic>=2.10.0",
 ]
 
 [project.optional-dependencies]
@@ -26,7 +27,7 @@ docs = [
 ]
 
 [tool.setuptools]
-py-modules = ["main", "player", "circleshape", "constants", "logger", "validationfunctions"]
+py-modules = ["main", "player", "circleshape", "constants", "logger", "validationfunctions", "asteroid", "asteroidfield"]
 
 [tool.mypy]
 strict = true
@@ -56,6 +57,8 @@ select = ["ALL"]  # Enable all rules, then exclude specific ones
 ignore = [
     "D",    # pydocstring (unless you want enforced docstrings)
     "S101", # allow assertions for tiger style, sys.flags.optimize == 0 ensures assertions run
+    "S311", # allow standard random for games (not cryptographic use)
+    "INP001", # implicit namespace package (no __init__.py needed for simple projects)
     "RET501",  # Allow explicit return None (Tiger Style preference)
 ]
 
@@ -76,10 +79,14 @@ disable = [
     "missing-class-docstring",     # C0115 - docstrings only where they add value
     "missing-function-docstring",  # C0116 - docstrings only where they add value
 ]
+extension-pkg-allow-list = ["pygame"]  # Allow pygame C extensions
 max-args = 5
-max-locals = 15
+max-locals = 20  # Increased for Tiger Style validation patterns
 max-returns = 6
 max-branches = 20
+
+[tool.pylint.design]
+max-locals = 20
 
 [tool.bandit]
 exclude_dirs = [".venv", "tests"]

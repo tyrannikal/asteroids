@@ -65,3 +65,30 @@ class RectWrapped(BaseModel):
             msg = "must be pygame.rect.Rect"
             raise TypeError(msg)
         return value
+
+
+class Vector2Wrapped(BaseModel):
+    """Pydantic wrapper for pygame.Vector2 with strict validation."""
+
+    object: pygame.Vector2
+
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        extra="forbid",
+        frozen=True,
+        validate_assignment=True,
+    )
+
+    @model_validator(mode="before")
+    def accept_raw_vector2(cls, data: Any) -> dict[str, Any]:  # noqa: N805, ANN401
+        if not isinstance(data, pygame.Vector2):
+            msg = "Vector2Wrapped must receive a type pygame.Vector2 or dict key"
+            raise TypeError(msg)
+        return {"object": data}
+
+    @field_validator("object")
+    def ensure_instance(cls, value: Any) -> pygame.Vector2:  # noqa: N805, ANN401
+        if not isinstance(value, pygame.Vector2):
+            msg = "must be pygame.Vector2"
+            raise TypeError(msg)
+        return value

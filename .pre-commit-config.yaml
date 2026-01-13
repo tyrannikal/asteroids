@@ -69,7 +69,16 @@ repos:
         args: [cc, ., -a, -nb, --min, A]
         types: [python]
         pass_filenames: false
-      
+
+      # MkDocs - Documentation build validation
+      - id: mkdocs
+        name: mkdocs-build-check
+        entry: mkdocs
+        language: system
+        args: [build, --strict, --site-dir, /tmp/mkdocs-build]
+        pass_filenames: false
+        files: '(mkdocs\.yml|docs/.*\.md|.*\.py$)'
+
         # Pytest - Run unit tests with coverage
       - id: pytest
         name: pytest

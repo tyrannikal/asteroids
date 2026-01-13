@@ -1,4 +1,3 @@
-"""Player class with triangle rendering and Pydantic validation."""
 # pylint: disable=c-extension-no-member,no-member  # Pygame uses C extensions
 
 from typing import Any
