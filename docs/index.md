@@ -63,8 +63,8 @@ mkdocs serve
 
 ```
 asteroids/
-├── main.py                  # Game entry point and main loop
-├── player.py                # Player ship class
+├── main.py                 # Game entry point and main loop
+├── player.py               # Player ship class
 ├── circleshape.py          # Base class for circular game objects
 ├── constants.py            # Validated game constants
 ├── logger.py               # Game state and event logging
