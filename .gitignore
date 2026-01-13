@@ -1,13 +1,22 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+*.so
 build/
 dist/
 wheels/
 *.egg-info
+*.egg
 
 # Virtual environments
 .venv
+venv/
+ENV/
+
+# Tool caches
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
 
 # Dev layouts
 layout.kdl
@@ -19,8 +28,19 @@ game_events.jsonl
 # Test artifacts
 .coverage
 htmlcov/
-.pytest_cache/
 
 # Documentation build
 site/
+
+# IDE/Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment variables
+.env
+.env.local
 
