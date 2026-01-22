@@ -51,9 +51,9 @@ def new_player_center() -> Player:
 
 @validate_call(validate_return=True)
 def fill_background(screen: SurfaceWrapped, color: str) -> RectWrapped:
-    assert color in pygame.colordict.THECOLORS, (
-        "background color must be listed in pygame.colordict.THECOLORS"
-    )
+    assert (
+        color in pygame.colordict.THECOLORS
+    ), "background color must be listed in pygame.colordict.THECOLORS"
 
     background: pygame.rect.Rect = screen.object.fill(color)
     assert isinstance(background, pygame.rect.Rect), "screen.fill must return type Rect"

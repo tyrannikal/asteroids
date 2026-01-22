@@ -54,9 +54,9 @@ class Player(CircleShape):
         ]
         assert isinstance(new_triangle, list), "new_triangle must be a list"
         assert len(new_triangle) == 3, "new_triangle must have exactly 3 vertices"
-        assert all(isinstance(v, pygame.Vector2) for v in new_triangle), (
-            "all triangle vertices must be Vector2"
-        )
+        assert all(
+            isinstance(v, pygame.Vector2) for v in new_triangle
+        ), "all triangle vertices must be Vector2"
 
         return new_triangle
 
@@ -65,9 +65,9 @@ class Player(CircleShape):
         get_player_triangle: list[pygame.Vector2] = self.triangle()
         assert isinstance(get_player_triangle, list), "self.triangle must return a list"
         assert len(get_player_triangle) == 3, "triangle must have exactly 3 vertices"
-        assert all(isinstance(v, pygame.Vector2) for v in get_player_triangle), (
-            "all triangle vertices must be Vector2"
-        )
+        assert all(
+            isinstance(v, pygame.Vector2) for v in get_player_triangle
+        ), "all triangle vertices must be Vector2"
 
         draw_player: pygame.rect.Rect = pygame.draw.polygon(
             screen.object,
