@@ -10,10 +10,13 @@ import freezegun
 import pygame
 from pytest_mock import MockerFixture
 
+import pytest
+
 import logger
 from constants import LoggingConstants
 
 
+@pytest.mark.unit
 class TestLogStateFrameCounting:
     """Tests for log_state frame counting logic."""
 
@@ -60,6 +63,7 @@ class TestLogStateFrameCounting:
         mock_open_func.assert_not_called()
 
 
+@pytest.mark.unit
 class TestLogStateFileIO:
     """Tests for log_state file I/O operations."""
 
@@ -121,6 +125,7 @@ class TestLogStateFileIO:
         assert mock_open_func.call_args[0][0] == "a"
 
 
+@pytest.mark.unit
 class TestLogStateIntrospection:
     """Tests for log_state introspection of caller locals."""
 
@@ -317,6 +322,7 @@ class TestLogStateIntrospection:
         mock_open_func.assert_not_called()
 
 
+@pytest.mark.unit
 class TestLogStateTimestamps:
     """Tests for log_state timestamp handling."""
 
@@ -347,6 +353,7 @@ class TestLogStateTimestamps:
             assert data["timestamp"] == "12:30:45.123"
 
 
+@pytest.mark.unit
 class TestLogEvent:
     """Tests for log_event function."""
 

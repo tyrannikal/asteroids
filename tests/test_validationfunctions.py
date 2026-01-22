@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from validationfunctions import RectWrapped, SurfaceWrapped
 
 
+@pytest.mark.unit
 class TestSurfaceWrapped:
     """Tests for SurfaceWrapped Pydantic model."""
 
@@ -71,6 +72,7 @@ class TestSurfaceWrapped:
         assert wrapped.object.get_size() == (1280, 720)
 
 
+@pytest.mark.unit
 class TestRectWrapped:
     """Tests for RectWrapped Pydantic model."""
 

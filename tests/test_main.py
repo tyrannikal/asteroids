@@ -13,6 +13,7 @@ from player import Player
 from validationfunctions import RectWrapped, SurfaceWrapped
 
 
+@pytest.mark.unit
 class TestPrintWelcomeMessage:
     """Tests for print_welcome_message function."""
 
@@ -49,6 +50,7 @@ class TestPrintWelcomeMessage:
             print_welcome_message()
 
 
+@pytest.mark.unit
 class TestStartGame:
     """Tests for start_game function."""
 
@@ -91,6 +93,7 @@ class TestStartGame:
         start_game()
 
 
+@pytest.mark.unit
 class TestNewPlayerCenter:
     """Tests for new_player_center function."""
 
@@ -118,6 +121,7 @@ class TestNewPlayerCenter:
         assert player.position.y == 360.0
 
 
+@pytest.mark.unit
 class TestFillBackground:
     """Tests for fill_background function."""
 
@@ -208,6 +212,7 @@ class TestFillBackground:
             assert isinstance(result, RectWrapped)
 
 
+@pytest.mark.unit
 class TestMainLoop:
     """Integration-style tests for main() with heavy mocking."""
 
@@ -448,6 +453,7 @@ class TestMainLoop:
         main()
 
 
+@pytest.mark.unit
 class TestSpriteGroups:
     """Tests for sprite group initialization and integration."""
 

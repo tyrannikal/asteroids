@@ -14,6 +14,7 @@ from player import Player
 from validationfunctions import SurfaceWrapped
 
 
+@pytest.mark.unit
 class TestPlayerInit:
     """Tests for Player initialization."""
 
@@ -51,6 +52,7 @@ class TestPlayerInit:
         assert player.radius == 20
 
 
+@pytest.mark.unit
 class TestPlayerPydanticValidation:
     """Tests for Player Pydantic custom validation."""
 
@@ -76,6 +78,7 @@ class TestPlayerPydanticValidation:
             Player._validate(42)
 
 
+@pytest.mark.unit
 class TestPlayerTriangle:
     """Critical tests for geometric triangle calculation."""
 
@@ -223,6 +226,7 @@ class TestPlayerTriangle:
         assert vertices[0].y == pytest.approx(20.0, abs=0.01)
 
 
+@pytest.mark.unit
 class TestPlayerDraw:
     """Tests for Player draw method."""
 
@@ -319,6 +323,7 @@ class TestPlayerDraw:
         assert len(vertices) == 3
 
 
+@pytest.mark.unit
 class TestPlayerRotate:
     """Tests for Player rotate method."""
 
@@ -426,6 +431,7 @@ class TestPlayerRotate:
             player.rotate("not a float")  # type: ignore[arg-type]
 
 
+@pytest.mark.unit
 class TestPlayerUpdate:
     """Tests for Player update method with keyboard input."""
 

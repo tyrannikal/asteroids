@@ -12,10 +12,10 @@ from asteroidfield import AsteroidField
 from validationfunctions import Vector2Wrapped
 
 
+@pytest.mark.integration
 class TestAsteroidFieldInit:
     """Tests for AsteroidField initialization."""
 
-    @pytest.mark.integration
     def test_init_creates_instance(self) -> None:
         """Test AsteroidField initializes correctly."""
         pygame.init()
@@ -28,7 +28,6 @@ class TestAsteroidFieldInit:
         assert isinstance(field, pygame.sprite.Sprite)
         assert field.spawn_timer == 0.0
 
-    @pytest.mark.integration
     def test_init_adds_to_containers(self) -> None:
         """Test AsteroidField is added to containers on init."""
         pygame.init()
@@ -40,6 +39,7 @@ class TestAsteroidFieldInit:
         assert field in updatable.sprites()
 
 
+@pytest.mark.integration
 class TestAsteroidFieldPydanticValidation:
     """Tests for AsteroidField Pydantic custom validation."""
 
@@ -65,10 +65,10 @@ class TestAsteroidFieldPydanticValidation:
             AsteroidField._validate(None)
 
 
+@pytest.mark.integration
 class TestAsteroidFieldSpawn:
     """Tests for AsteroidField spawn method."""
 
-    @pytest.mark.integration
     def test_spawn_creates_asteroid(self, mocker: MockerFixture) -> None:
         """Test spawn method creates an Asteroid instance."""
         pygame.init()
@@ -92,10 +92,10 @@ class TestAsteroidFieldSpawn:
         assert asteroid.radius == 30
 
 
+@pytest.mark.integration
 class TestAsteroidFieldUpdate:
     """Tests for AsteroidField update method."""
 
-    @pytest.mark.integration
     def test_update_increments_spawn_timer(self, mocker: MockerFixture) -> None:
         """Test update increments spawn_timer when below spawn rate."""
         pygame.init()
@@ -112,7 +112,6 @@ class TestAsteroidFieldUpdate:
 
         assert field.spawn_timer == -0.5
 
-    @pytest.mark.integration
     def test_update_spawns_asteroid_after_timer_expires(self, mocker: MockerFixture) -> None:
         """Test update spawns asteroid when timer exceeds spawn rate."""
         pygame.init()
@@ -138,7 +137,6 @@ class TestAsteroidFieldUpdate:
         # An asteroid should be spawned
         assert len(asteroids.sprites()) > 0
 
-    @pytest.mark.integration
     def test_update_does_not_spawn_before_timer_expires(self, mocker: MockerFixture) -> None:
         """Test update does not spawn asteroid when timer is below spawn rate."""
         pygame.init()
@@ -173,6 +171,7 @@ class TestAsteroidFieldUpdate:
             field.update("invalid")  # type: ignore[arg-type]
 
 
+@pytest.mark.unit
 class TestAsteroidFieldEdges:
     """Tests for AsteroidField edges class attribute."""
 

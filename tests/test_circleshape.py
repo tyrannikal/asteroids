@@ -10,6 +10,7 @@ from pytest_mock import MockerFixture
 from circleshape import CircleShape
 
 
+@pytest.mark.unit
 class TestCircleShapeInit:
     """Tests for CircleShape initialization."""
 
@@ -99,6 +100,7 @@ class TestCircleShapeInit:
             CircleShape(100.0, 200.0, "20")  # type: ignore[arg-type]
 
 
+@pytest.mark.unit
 class TestCircleShapeMethods:
     """Tests for CircleShape methods."""
 
@@ -129,6 +131,7 @@ class TestCircleShapeMethods:
         assert result is None
 
 
+@pytest.mark.unit
 class TestCircleShapeWithContainers:
     """Tests for CircleShape with sprite containers."""
 
@@ -170,6 +173,7 @@ class TestCircleShapeWithContainers:
         assert shape.radius == 25
 
 
+@pytest.mark.unit
 class TestCircleShapeCollision:
     """Tests for CircleShape collision detection."""
 

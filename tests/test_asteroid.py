@@ -12,6 +12,7 @@ from circleshape import CircleShape
 from validationfunctions import SurfaceWrapped
 
 
+@pytest.mark.unit
 class TestAsteroidInit:
     """Tests for Asteroid initialization."""
 
@@ -43,6 +44,7 @@ class TestAsteroidInit:
         assert isinstance(asteroid, CircleShape)
 
 
+@pytest.mark.unit
 class TestAsteroidPydanticValidation:
     """Tests for Asteroid Pydantic custom validation."""
 
@@ -63,10 +65,10 @@ class TestAsteroidPydanticValidation:
             Asteroid._validate(None)
 
 
+@pytest.mark.integration
 class TestAsteroidDraw:
     """Tests for Asteroid draw method."""
 
-    @pytest.mark.integration
     def test_draw_calls_pygame_circle(self, mocker: MockerFixture) -> None:
         """Test draw method calls pygame.draw.circle with correct parameters."""
         pygame.init()
@@ -86,6 +88,7 @@ class TestAsteroidDraw:
         assert args[3] == 30
 
 
+@pytest.mark.unit
 class TestAsteroidUpdate:
     """Tests for Asteroid update method."""
 

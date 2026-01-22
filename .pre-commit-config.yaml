@@ -75,7 +75,7 @@ repos:
         name: mkdocs-build-check
         entry: mkdocs
         language: system
-        args: [build, --strict, --site-dir, /tmp/mkdocs-build]
+        args: [build, --strict, --site-dir, ./build/mkdocs]
         pass_filenames: false
         files: '(mkdocs\.yml|docs/.*\.md|.*\.py$)'
 

@@ -6,6 +6,7 @@ from pydantic import ValidationError
 from constants import GameArea, LoggingConstants, PlayerDimensions
 
 
+@pytest.mark.unit
 class TestPlayerDimensions:
     """Tests for PlayerDimensions Pydantic model."""
 
@@ -64,6 +65,7 @@ class TestPlayerDimensions:
         assert isinstance(dims.LINE_WIDTH, int)
 
 
+@pytest.mark.unit
 class TestGameArea:
     """Tests for GameArea Pydantic model."""
 
@@ -128,6 +130,7 @@ class TestGameArea:
         assert area.SCREEN_HEIGHT == 10000
 
 
+@pytest.mark.unit
 class TestLoggingConstants:
     """Tests for LoggingConstants Pydantic model."""
 
