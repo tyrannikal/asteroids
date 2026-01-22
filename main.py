@@ -13,6 +13,7 @@ from asteroidfield import AsteroidField
 from constants import GAME_AREA
 from logger import log_event, log_state
 from player import Player
+from shot import Shot
 from validationfunctions import RectWrapped, SurfaceWrapped
 
 # Tiger Style requirement: Ensure assertions are never disabled
@@ -50,9 +51,9 @@ def new_player_center() -> Player:
 
 @validate_call(validate_return=True)
 def fill_background(screen: SurfaceWrapped, color: str) -> RectWrapped:
-    assert (
-        color in pygame.colordict.THECOLORS
-    ), "background color must be listed in pygame.colordict.THECOLORS"
+    assert color in pygame.colordict.THECOLORS, (
+        "background color must be listed in pygame.colordict.THECOLORS"
+    )
 
     background: pygame.rect.Rect = screen.object.fill(color)
     assert isinstance(background, pygame.rect.Rect), "screen.fill must return type Rect"
@@ -90,22 +91,28 @@ def main() -> None:
     assert isinstance(wrapped_screen, SurfaceWrapped), "model_validate must return SurfaceWrapped"
 
     # pylint: disable=line-too-long
-    updatable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
+    updatable: pygame.sprite.Group = (  # type: ignore[type-arg]
         pygame.sprite.Group()
     )
     assert isinstance(updatable, pygame.sprite.Group), "updatable must be a Group"
 
-    drawable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
+    drawable: pygame.sprite.Group = (  # type: ignore[type-arg]
         pygame.sprite.Group()
     )
     # pylint: enable=line-too-long
     assert isinstance(drawable, pygame.sprite.Group), "drawable must be a Group"
+
+    shots: pygame.sprite.Group = (  # type: ignore[type-arg]
+        pygame.sprite.Group()
+    )
+    assert isinstance(shots, pygame.sprite.Group), "shots must be a Group"
 
     asteroids: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
     # pylint: enable=line-too-long
     assert isinstance(asteroids, pygame.sprite.Group), "asteroids must be a Group"
 
     Player.containers = (updatable, drawable)  # type: ignore[attr-defined]
+    Shot.containers = (shots, updatable, drawable)  # type: ignore[attr-defined]
     Asteroid.containers = (asteroids, updatable, drawable)  # type: ignore[attr-defined]
     AsteroidField.containers = (updatable,)
 

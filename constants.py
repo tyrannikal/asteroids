@@ -9,6 +9,8 @@ screen_height_literal = 720
 player_radius_literal = 20
 player_turn_speed_literal = 300
 player_speed_literal = 200
+player_shoot_speed_literal = 500
+shot_radius_literal = 5
 
 asteroid_min_radius_literal = 20
 asteroid_kinds_literal = 3
@@ -21,7 +23,7 @@ max_seconds_literal = 16
 sprite_sample_limit_literal = 10  # Maximum number of sprites to log per group
 
 
-class PlayerDimensions(BaseModel):
+class PlayerStats(BaseModel):
     """Player visual dimensions with validated constraints."""
 
     PLAYER_RADIUS: int = Field(
@@ -44,6 +46,16 @@ class PlayerDimensions(BaseModel):
         default=player_speed_literal,
         validate_default=True,
     )
+    PLAYER_SHOOT_SPEED: int = Field(
+        gt=0,
+        default=player_shoot_speed_literal,
+        validate_default=True,
+    )
+    SHOT_RADIUS: int = Field(
+        gt=0,
+        default=shot_radius_literal,
+        validate_default=True,
+    )
     model_config = ConfigDict(frozen=True)
 
     @field_validator(
@@ -51,6 +63,8 @@ class PlayerDimensions(BaseModel):
         "LINE_WIDTH",
         "PLAYER_TURN_SPEED",
         "PLAYER_SPEED",
+        "PLAYER_SHOOT_SPEED",
+        "SHOT_RADIUS",
         mode="before",
     )
     @classmethod
@@ -147,7 +161,7 @@ class LoggingConstants(BaseModel):
 
 
 # Module-level singleton instances (immutable, validated constants)
-PLAYER_DIMS = PlayerDimensions()
+PLAYER_STATS = PlayerStats()
 ASTEROID_STATS = AsteroidStats()
 GAME_AREA = GameArea()
 LOG_CONFIG = LoggingConstants()

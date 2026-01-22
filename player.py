@@ -7,7 +7,7 @@ from pydantic import validate_call
 from pydantic_core import core_schema
 
 from circleshape import CircleShape
-from constants import PLAYER_DIMS
+from constants import PLAYER_STATS
 from validationfunctions import SurfaceWrapped
 
 
@@ -18,7 +18,7 @@ class Player(CircleShape):
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
 
-        super().__init__(x, y, PLAYER_DIMS.PLAYER_RADIUS)
+        super().__init__(x, y, PLAYER_STATS.PLAYER_RADIUS)
         self.rotation: float = 0.0
 
     @classmethod
@@ -54,9 +54,9 @@ class Player(CircleShape):
         ]
         assert isinstance(new_triangle, list), "new_triangle must be a list"
         assert len(new_triangle) == 3, "new_triangle must have exactly 3 vertices"
-        assert all(
-            isinstance(v, pygame.Vector2) for v in new_triangle
-        ), "all triangle vertices must be Vector2"
+        assert all(isinstance(v, pygame.Vector2) for v in new_triangle), (
+            "all triangle vertices must be Vector2"
+        )
 
         return new_triangle
 
@@ -65,15 +65,15 @@ class Player(CircleShape):
         get_player_triangle: list[pygame.Vector2] = self.triangle()
         assert isinstance(get_player_triangle, list), "self.triangle must return a list"
         assert len(get_player_triangle) == 3, "triangle must have exactly 3 vertices"
-        assert all(
-            isinstance(v, pygame.Vector2) for v in get_player_triangle
-        ), "all triangle vertices must be Vector2"
+        assert all(isinstance(v, pygame.Vector2) for v in get_player_triangle), (
+            "all triangle vertices must be Vector2"
+        )
 
         draw_player: pygame.rect.Rect = pygame.draw.polygon(
             screen.object,
             "white",
             get_player_triangle,
-            PLAYER_DIMS.LINE_WIDTH,
+            PLAYER_STATS.LINE_WIDTH,
         )
         assert isinstance(
             draw_player,
@@ -82,7 +82,7 @@ class Player(CircleShape):
 
     @validate_call(validate_return=True)
     def rotate(self, dt: float) -> None:
-        self.rotation += PLAYER_DIMS.PLAYER_TURN_SPEED * dt
+        self.rotation += PLAYER_STATS.PLAYER_TURN_SPEED * dt
 
     @validate_call(validate_return=True)
     def update(self, dt: float) -> None:
@@ -112,7 +112,7 @@ class Player(CircleShape):
         assert isinstance(rotated_vector, pygame.Vector2), "rotated_vector must return Vector2"
 
         assert isinstance(dt, float), "dt must be a float"
-        rotated_with_speed_vector = rotated_vector * PLAYER_DIMS.PLAYER_SPEED * dt
+        rotated_with_speed_vector = rotated_vector * PLAYER_STATS.PLAYER_SPEED * dt
         assert isinstance(
             rotated_with_speed_vector,
             pygame.Vector2,
