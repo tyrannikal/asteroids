@@ -11,7 +11,7 @@ from pygame import version
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
 from constants import GAME_AREA
-from logger import log_state
+from logger import log_event, log_state
 from player import Player
 from validationfunctions import RectWrapped, SurfaceWrapped
 
@@ -128,8 +128,7 @@ def main() -> None:
     ), "updatable must contain new_asteroid_field"
 
     while True:
-        log_state_return: None = log_state()  # type: ignore[func-returns-value]
-        assert log_state_return is None, "log_state must return type None"
+        log_state()
 
         event_list: list[pygame.event.Event] = pygame.event.get()
         assert isinstance(event_list, list), "pygame.event.get() must return type list"
@@ -141,6 +140,13 @@ def main() -> None:
         assert isinstance(background, RectWrapped), "fill_background must return type RectWrapped"
 
         updatable.update(dt)
+
+        asteroid: Asteroid
+        for asteroid in asteroids:  # pyright: ignore[reportUnknownVariableType]
+            if asteroid.collides_with(new_player):  # pyright: ignore[reportUnknownMemberType]
+                log_event("player_hit")
+                sys.stdout.write("Game over!\n")
+                sys.exit()
 
         player_item: Player
         for player_item in drawable:  # pyright: ignore[reportUnknownVariableType]

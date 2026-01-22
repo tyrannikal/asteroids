@@ -168,3 +168,69 @@ class TestCircleShapeWithContainers:
         shape = CircleShape(0.0, 0.0, 10)
         shape.radius = 25
         assert shape.radius == 25
+
+
+class TestCircleShapeCollision:
+    """Tests for CircleShape collision detection."""
+
+    def test_collides_with_overlapping_circles(self) -> None:
+        """Test collision detection returns True when circles overlap."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(15.0, 0.0, 10)
+        # Distance is 15, sum of radii is 20, so they overlap
+        assert shape1.collides_with(shape2) is True
+
+    def test_collides_with_non_overlapping_circles(self) -> None:
+        """Test collision detection returns False when circles don't overlap."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(100.0, 0.0, 10)
+        # Distance is 100, sum of radii is 20, so they don't overlap
+        assert shape1.collides_with(shape2) is False
+
+    def test_collides_with_touching_circles(self) -> None:
+        """Test collision detection returns False when circles exactly touch."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(20.0, 0.0, 10)
+        # Distance is 20, sum of radii is 20, so they exactly touch (not overlapping)
+        assert shape1.collides_with(shape2) is False
+
+    def test_collides_with_same_position(self) -> None:
+        """Test collision detection returns True when circles are at same position."""
+        shape1 = CircleShape(50.0, 50.0, 5)
+        shape2 = CircleShape(50.0, 50.0, 5)
+        # Distance is 0, sum of radii is 10, so they overlap
+        assert shape1.collides_with(shape2) is True
+
+    def test_collides_with_diagonal_collision(self) -> None:
+        """Test collision detection with diagonal positioning."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(10.0, 10.0, 10)
+        # Distance is sqrt(200) ≈ 14.14, sum of radii is 20, so they overlap
+        assert shape1.collides_with(shape2) is True
+
+    def test_collides_with_diagonal_no_collision(self) -> None:
+        """Test no collision with diagonal positioning."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(50.0, 50.0, 10)
+        # Distance is sqrt(5000) ≈ 70.71, sum of radii is 20, so they don't overlap
+        assert shape1.collides_with(shape2) is False
+
+    def test_collides_with_different_radii(self) -> None:
+        """Test collision detection with circles of different sizes."""
+        shape1 = CircleShape(0.0, 0.0, 5)
+        shape2 = CircleShape(10.0, 0.0, 10)
+        # Distance is 10, sum of radii is 15, so they overlap
+        assert shape1.collides_with(shape2) is True
+
+    def test_collides_with_negative_coordinates(self) -> None:
+        """Test collision detection with negative coordinates."""
+        shape1 = CircleShape(-10.0, -10.0, 10)
+        shape2 = CircleShape(-5.0, -5.0, 10)
+        # Distance is sqrt(50) ≈ 7.07, sum of radii is 20, so they overlap
+        assert shape1.collides_with(shape2) is True
+
+    def test_collides_with_symmetry(self) -> None:
+        """Test collision detection is symmetric (A collides with B = B collides with A)."""
+        shape1 = CircleShape(0.0, 0.0, 10)
+        shape2 = CircleShape(15.0, 0.0, 10)
+        assert shape1.collides_with(shape2) == shape2.collides_with(shape1)

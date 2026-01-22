@@ -19,7 +19,7 @@ class Player(CircleShape):
         assert isinstance(y, float), "y must be a float"
 
         super().__init__(x, y, PLAYER_DIMS.PLAYER_RADIUS)
-        self.rotation: float = 0
+        self.rotation: float = 0.0
 
     @classmethod
     def __get_pydantic_core_schema__(

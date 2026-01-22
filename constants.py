@@ -86,12 +86,17 @@ class AsteroidStats(BaseModel):
     @field_validator(
         "ASTEROID_MIN_RADIUS",
         "ASTEROID_KINDS",
-        "ASTEROID_SPAWN_RATE_SECONDS",
         "ASTEROID_MAX_RADIUS",
+        mode="before",
     )
     @classmethod
     def convert_to_int(cls, v: float) -> int:
         return int(v)
+
+    @field_validator("ASTEROID_SPAWN_RATE_SECONDS", mode="before")
+    @classmethod
+    def convert_to_float(cls, v: int) -> float:
+        return float(v)
 
 
 class GameArea(BaseModel):
