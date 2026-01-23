@@ -3,66 +3,66 @@
 import pytest
 from pydantic import ValidationError
 
-from constants import GameArea, LoggingConstants, PlayerDimensions
+from constants import GameArea, LoggingConstants, PlayerStats
 
 
 @pytest.mark.unit
-class TestPlayerDimensions:
-    """Tests for PlayerDimensions Pydantic model."""
+class TestPlayerStats:
+    """Tests for PlayerStats Pydantic model."""
 
     def test_default_values(self) -> None:
-        """Test PlayerDimensions uses correct default values."""
-        dims = PlayerDimensions()
-        assert dims.PLAYER_RADIUS == 20
-        assert dims.LINE_WIDTH == 2
+        """Test PlayerStats uses correct default values."""
+        stats = PlayerStats()
+        assert stats.PLAYER_RADIUS == 20
+        assert stats.LINE_WIDTH == 2
 
     def test_custom_valid_values(self) -> None:
-        """Test PlayerDimensions accepts valid custom values."""
-        dims = PlayerDimensions(PLAYER_RADIUS=30, LINE_WIDTH=3)
-        assert dims.PLAYER_RADIUS == 30
-        assert dims.LINE_WIDTH == 3
+        """Test PlayerStats accepts valid custom values."""
+        stats = PlayerStats(PLAYER_RADIUS=30, LINE_WIDTH=3)
+        assert stats.PLAYER_RADIUS == 30
+        assert stats.LINE_WIDTH == 3
 
     def test_negative_radius_raises_error(self) -> None:
         """Test negative PLAYER_RADIUS raises ValidationError."""
         with pytest.raises(ValidationError) as exc_info:
-            PlayerDimensions(PLAYER_RADIUS=-5)
+            PlayerStats(PLAYER_RADIUS=-5)
         assert "greater than 0" in str(exc_info.value).lower()
 
     def test_zero_radius_raises_error(self) -> None:
         """Test zero PLAYER_RADIUS raises ValidationError (gt=0)."""
         with pytest.raises(ValidationError) as exc_info:
-            PlayerDimensions(PLAYER_RADIUS=0)
+            PlayerStats(PLAYER_RADIUS=0)
         assert "greater than 0" in str(exc_info.value).lower()
 
     def test_negative_line_width_raises_error(self) -> None:
         """Test negative LINE_WIDTH raises ValidationError."""
         with pytest.raises(ValidationError) as exc_info:
-            PlayerDimensions(LINE_WIDTH=-1)
+            PlayerStats(LINE_WIDTH=-1)
         assert "greater than 0" in str(exc_info.value).lower()
 
     def test_zero_line_width_raises_error(self) -> None:
         """Test zero LINE_WIDTH raises ValidationError (gt=0)."""
         with pytest.raises(ValidationError) as exc_info:
-            PlayerDimensions(LINE_WIDTH=0)
+            PlayerStats(LINE_WIDTH=0)
         assert "greater than 0" in str(exc_info.value).lower()
 
     def test_immutability(self) -> None:
-        """Test PlayerDimensions is frozen (cannot modify fields)."""
-        dims = PlayerDimensions()
+        """Test PlayerStats is frozen (cannot modify fields)."""
+        stats = PlayerStats()
         with pytest.raises(ValidationError):
-            dims.PLAYER_RADIUS = 50  # type: ignore[misc]
+            stats.PLAYER_RADIUS = 50  # type: ignore[misc]
 
     def test_float_radius_converted_to_int(self) -> None:
         """Test float PLAYER_RADIUS is converted to int."""
-        dims = PlayerDimensions(PLAYER_RADIUS=25.7)
-        assert dims.PLAYER_RADIUS == 25
-        assert isinstance(dims.PLAYER_RADIUS, int)
+        stats = PlayerStats(PLAYER_RADIUS=25.7)
+        assert stats.PLAYER_RADIUS == 25
+        assert isinstance(stats.PLAYER_RADIUS, int)
 
     def test_float_line_width_converted_to_int(self) -> None:
         """Test float LINE_WIDTH is converted to int."""
-        dims = PlayerDimensions(LINE_WIDTH=3.9)
-        assert dims.LINE_WIDTH == 3
-        assert isinstance(dims.LINE_WIDTH, int)
+        stats = PlayerStats(LINE_WIDTH=3.9)
+        assert stats.LINE_WIDTH == 3
+        assert isinstance(stats.LINE_WIDTH, int)
 
 
 @pytest.mark.unit

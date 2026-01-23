@@ -9,7 +9,7 @@ from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from circleshape import CircleShape
-from constants import PlayerDimensions
+from constants import PLAYER_STATS
 from player import Player
 from validationfunctions import SurfaceWrapped
 
@@ -44,10 +44,10 @@ class TestPlayerInit:
         player = Player(100.0, 200.0)
         assert player.rotation == 0
 
-    def test_radius_uses_player_dimensions(self) -> None:
-        """Test radius comes from PlayerDimensions.PLAYER_RADIUS."""
+    def test_radius_uses_player_stats(self) -> None:
+        """Test radius comes from PLAYER_STATS.PLAYER_RADIUS."""
         player = Player(0.0, 0.0)
-        expected_radius = PlayerDimensions().PLAYER_RADIUS
+        expected_radius = PLAYER_STATS.PLAYER_RADIUS
         assert player.radius == expected_radius
         assert player.radius == 20
 
@@ -85,7 +85,7 @@ class TestPlayerTriangle:
     def test_triangle_at_zero_rotation(self) -> None:
         """Test triangle vertices at rotation=0 (pointing up)."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         vertices = player.triangle()
 
         # At rotation 0, forward is (0, 1)
@@ -97,7 +97,7 @@ class TestPlayerTriangle:
     def test_triangle_at_90_degrees(self) -> None:
         """Test triangle vertices at rotation=90 (pointing right)."""
         player = Player(100.0, 100.0)
-        player.rotation = 90
+        player.rotation = 90.0
         vertices = player.triangle()
 
         # At rotation 90, forward is (-1, 0) after pygame rotation
@@ -110,7 +110,7 @@ class TestPlayerTriangle:
     def test_triangle_at_180_degrees(self) -> None:
         """Test triangle vertices at rotation=180 (pointing down)."""
         player = Player(100.0, 100.0)
-        player.rotation = 180
+        player.rotation = 180.0
         vertices = player.triangle()
 
         # At rotation 180, forward is (0, -1)
@@ -121,7 +121,7 @@ class TestPlayerTriangle:
     def test_triangle_at_270_degrees(self) -> None:
         """Test triangle vertices at rotation=270 (pointing left)."""
         player = Player(100.0, 100.0)
-        player.rotation = 270
+        player.rotation = 270.0
         vertices = player.triangle()
 
         # At rotation 270, forward is (1, 0)
@@ -132,7 +132,7 @@ class TestPlayerTriangle:
     def test_triangle_at_45_degrees(self) -> None:
         """Test triangle vertices at non-cardinal angle."""
         player = Player(0.0, 0.0)
-        player.rotation = 45
+        player.rotation = 45.0
         vertices = player.triangle()
 
         # At 45 degrees, forward should be at roughly 45° angle
@@ -161,7 +161,7 @@ class TestPlayerTriangle:
     def test_triangle_front_vertex_distance(self) -> None:
         """Test front vertex is exactly radius distance from center."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         vertices = player.triangle()
 
         # Front vertex (vertices[0]) should be radius distance from position
@@ -171,7 +171,7 @@ class TestPlayerTriangle:
     def test_triangle_symmetry(self) -> None:
         """Test back two vertices are symmetric relative to forward direction."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         vertices = player.triangle()
 
         # At rotation 0 (forward points up), back vertices should have same y coordinate
@@ -181,10 +181,10 @@ class TestPlayerTriangle:
         """Test triangle updates when rotation changes."""
         player = Player(100.0, 100.0)
 
-        player.rotation = 0
+        player.rotation = 0.0
         vertices_0 = player.triangle()
 
-        player.rotation = 90
+        player.rotation = 90.0
         vertices_90 = player.triangle()
 
         # Vertices should be different after rotation change
@@ -193,7 +193,7 @@ class TestPlayerTriangle:
     def test_triangle_negative_rotation(self) -> None:
         """Test triangle with negative rotation angle."""
         player = Player(100.0, 100.0)
-        player.rotation = -90
+        player.rotation = -90.0
         vertices = player.triangle()
 
         # Should still return 3 valid Vector2 instances
@@ -204,10 +204,10 @@ class TestPlayerTriangle:
         """Test triangle at 360 degrees equals 0 degrees."""
         player = Player(100.0, 100.0)
 
-        player.rotation = 0
+        player.rotation = 0.0
         vertices_0 = player.triangle()
 
-        player.rotation = 360
+        player.rotation = 360.0
         vertices_360 = player.triangle()
 
         # Should be approximately equal
@@ -218,7 +218,7 @@ class TestPlayerTriangle:
     def test_triangle_at_origin(self) -> None:
         """Test triangle calculation when player at origin."""
         player = Player(0.0, 0.0)
-        player.rotation = 0
+        player.rotation = 0.0
         vertices = player.triangle()
 
         # Front vertex should be at (0, radius)
@@ -250,7 +250,7 @@ class TestPlayerDraw:
         assert call_args[0][1] == "white"  # Color
         assert isinstance(call_args[0][2], list)  # Triangle vertices
         assert len(call_args[0][2]) == 3
-        assert call_args[0][3] == PlayerDimensions().LINE_WIDTH  # Line width
+        assert call_args[0][3] == PLAYER_STATS.LINE_WIDTH  # Line width
 
     def test_draw_returns_none(self, mocker: MockerFixture, mock_surface: MagicMock) -> None:
         """Test draw() returns None."""
@@ -312,7 +312,7 @@ class TestPlayerDraw:
         )
 
         player = Player(100.0, 100.0)
-        player.rotation = 45
+        player.rotation = 45.0
         wrapped = SurfaceWrapped.model_validate(mock_surface)
         player.draw(wrapped)
 
@@ -330,7 +330,7 @@ class TestPlayerRotate:
     def test_rotate_positive_dt_increases_rotation(self) -> None:
         """Test rotate with positive dt increases rotation."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.rotate(1.0)
 
         # PLAYER_TURN_SPEED is 300, so rotation should increase by 300 * 1.0 = 300
@@ -339,7 +339,7 @@ class TestPlayerRotate:
     def test_rotate_negative_dt_decreases_rotation(self) -> None:
         """Test rotate with negative dt decreases rotation."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.rotate(-1.0)
 
         # rotation should decrease by 300 * -1.0 = -300
@@ -348,7 +348,7 @@ class TestPlayerRotate:
     def test_rotate_zero_dt_no_change(self) -> None:
         """Test rotate with zero dt makes no change."""
         player = Player(100.0, 100.0)
-        player.rotation = 45
+        player.rotation = 45.0
         player.rotate(0.0)
 
         assert player.rotation == pytest.approx(45.0, abs=0.01)
@@ -356,7 +356,7 @@ class TestPlayerRotate:
     def test_rotate_small_dt(self) -> None:
         """Test rotate with small dt value (typical frame time)."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         # Typical 60fps frame time is ~0.0167 seconds
         player.rotate(0.0167)
 
@@ -366,7 +366,7 @@ class TestPlayerRotate:
     def test_rotate_accumulation(self) -> None:
         """Test multiple rotate calls accumulate correctly."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
 
         player.rotate(0.1)  # +30 degrees
         player.rotate(0.1)  # +30 degrees
@@ -377,7 +377,7 @@ class TestPlayerRotate:
     def test_rotate_from_non_zero_initial(self) -> None:
         """Test rotate from non-zero starting rotation."""
         player = Player(100.0, 100.0)
-        player.rotation = 45
+        player.rotation = 45.0
         player.rotate(0.5)  # +150 degrees
 
         assert player.rotation == pytest.approx(195.0, abs=0.01)
@@ -385,7 +385,7 @@ class TestPlayerRotate:
     def test_rotate_beyond_360(self) -> None:
         """Test rotation can exceed 360 degrees."""
         player = Player(100.0, 100.0)
-        player.rotation = 350
+        player.rotation = 350.0
         player.rotate(1.0)  # +300 degrees
 
         # Should be 650, not wrapped
@@ -394,7 +394,7 @@ class TestPlayerRotate:
     def test_rotate_negative_rotation(self) -> None:
         """Test rotation can go negative."""
         player = Player(100.0, 100.0)
-        player.rotation = 10
+        player.rotation = 10.0
         player.rotate(-1.0)  # -300 degrees
 
         assert player.rotation == pytest.approx(-290.0, abs=0.01)
@@ -402,7 +402,7 @@ class TestPlayerRotate:
     def test_rotate_large_dt(self) -> None:
         """Test rotate with large dt value."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.rotate(10.0)
 
         assert player.rotation == pytest.approx(3000.0, abs=0.01)
@@ -417,8 +417,8 @@ class TestPlayerRotate:
     def test_rotate_uses_player_turn_speed(self) -> None:
         """Test rotate uses PLAYER_TURN_SPEED constant."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
-        expected_speed = PlayerDimensions().PLAYER_TURN_SPEED
+        player.rotation = 0.0
+        expected_speed = PLAYER_STATS.PLAYER_TURN_SPEED
         player.rotate(1.0)
 
         assert player.rotation == pytest.approx(float(expected_speed), abs=0.01)
@@ -443,7 +443,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.update(0.1)
 
         # Should rotate by PLAYER_TURN_SPEED * dt = 300 * 0.1 = 30 degrees
@@ -456,7 +456,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.update(0.1)
 
         # Should rotate by PLAYER_TURN_SPEED * -dt = 300 * -0.1 = -30 degrees
@@ -469,7 +469,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.update(0.1)
 
         # Both rotations applied: +30 and -30 = 0
@@ -482,7 +482,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 45
+        player.rotation = 45.0
         player.update(0.1)
 
         # Rotation should remain unchanged
@@ -508,7 +508,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 50
+        player.rotation = 50.0
         player.update(0.0)
 
         # No time passed, so no rotation
@@ -521,7 +521,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.update(5.0)
 
         # 300 * 5.0 = 1500 degrees
@@ -534,7 +534,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
         player.update(-0.1)
 
         # 300 * -0.1 = -30 degrees (reverses rotation direction)
@@ -569,7 +569,7 @@ class TestPlayerUpdate:
         mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
 
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
 
         # Simulate 3 frames at 60fps (~0.0167s each)
         player.update(0.0167)
@@ -582,7 +582,7 @@ class TestPlayerUpdate:
     def test_update_alternating_keys(self, mocker: MockerFixture) -> None:
         """Test alternating between a and d keys."""
         player = Player(100.0, 100.0)
-        player.rotation = 0
+        player.rotation = 0.0
 
         # Press 'a'
         mock_keys_a = MagicMock(spec=pygame.key.ScancodeWrapper)
@@ -609,3 +609,387 @@ class TestPlayerUpdate:
 
         with pytest.raises(ValidationError):
             player.update("not a float")  # type: ignore[arg-type]
+
+
+@pytest.mark.unit
+class TestPlayerMove:
+    """Tests for Player move method."""
+
+    def test_move_forward_at_zero_rotation(self) -> None:
+        """Test move forward when rotation is 0 (pointing up in pygame coords)."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.move(1.0)
+
+        # At rotation 0, forward is (0, 1), so position.y increases
+        # PLAYER_SPEED is 200, so y += 200 * 1.0
+        assert player.position.x == pytest.approx(100.0, abs=0.01)
+        assert player.position.y == pytest.approx(300.0, abs=0.01)
+
+    def test_move_forward_at_90_degrees(self) -> None:
+        """Test move forward when rotation is 90 degrees."""
+        player = Player(100.0, 100.0)
+        player.rotation = 90.0
+        player.move(1.0)
+
+        # At rotation 90, forward is (-1, 0), so position.x decreases
+        assert player.position.x == pytest.approx(-100.0, abs=0.01)
+        assert player.position.y == pytest.approx(100.0, abs=0.01)
+
+    def test_move_backward_negative_dt(self) -> None:
+        """Test move backward with negative dt."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.move(-1.0)
+
+        # Negative dt moves in opposite direction
+        assert player.position.x == pytest.approx(100.0, abs=0.01)
+        assert player.position.y == pytest.approx(-100.0, abs=0.01)
+
+    def test_move_zero_dt_no_change(self) -> None:
+        """Test move with zero dt makes no change."""
+        player = Player(100.0, 100.0)
+        player.rotation = 45.0
+        player.move(0.0)
+
+        assert player.position.x == pytest.approx(100.0, abs=0.01)
+        assert player.position.y == pytest.approx(100.0, abs=0.01)
+
+    def test_move_small_dt(self) -> None:
+        """Test move with small dt (typical frame time)."""
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.move(0.0167)  # ~60fps
+
+        # 200 * 0.0167 = 3.34
+        assert player.position.x == pytest.approx(100.0, abs=0.01)
+        assert player.position.y == pytest.approx(103.34, abs=0.1)
+
+    def test_move_returns_none(self) -> None:
+        """Test move returns None."""
+        player = Player(100.0, 100.0)
+        result = player.move(1.0)
+
+        assert result is None
+
+
+@pytest.mark.unit
+class TestPlayerShoot:
+    """Tests for Player shoot method."""
+
+    def test_shoot_creates_shot(self) -> None:
+        """Test shoot() creates a Shot instance."""
+        from shot import Shot
+
+        player = Player(100.0, 100.0)
+        player.shoot()
+
+        # Shot should be created (we can't directly verify without group access,
+        # but we can verify no exceptions are raised)
+        assert True  # Test passes if no exception
+
+    def test_shoot_returns_none(self) -> None:
+        """Test shoot() returns None."""
+        player = Player(100.0, 100.0)
+        result = player.shoot()
+
+        assert result is None
+
+    def test_shoot_at_zero_rotation_fires_upward(self, mocker: MockerFixture) -> None:
+        """Test shot velocity at rotation=0 points up (positive y in pygame)."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At rotation 0, velocity should point in (0, 1) direction
+        assert shot.velocity.x == pytest.approx(0.0, abs=0.01)
+        assert shot.velocity.y == pytest.approx(PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+
+    def test_shoot_at_90_degrees_fires_left(self, mocker: MockerFixture) -> None:
+        """Test shot velocity at rotation=90 points left."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 90.0
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At rotation 90, velocity should point in (-1, 0) direction
+        assert shot.velocity.x == pytest.approx(-PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+        assert shot.velocity.y == pytest.approx(0.0, abs=0.01)
+
+    def test_shoot_at_180_degrees_fires_down(self, mocker: MockerFixture) -> None:
+        """Test shot velocity at rotation=180 points down."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 180.0
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At rotation 180, velocity should point in (0, -1) direction
+        assert shot.velocity.x == pytest.approx(0.0, abs=0.01)
+        assert shot.velocity.y == pytest.approx(-PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+
+    def test_shoot_at_270_degrees_fires_right(self, mocker: MockerFixture) -> None:
+        """Test shot velocity at rotation=270 points right."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 270.0
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At rotation 270, velocity should point in (1, 0) direction
+        assert shot.velocity.x == pytest.approx(PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+        assert shot.velocity.y == pytest.approx(0.0, abs=0.01)
+
+    def test_shoot_at_45_degrees(self, mocker: MockerFixture) -> None:
+        """Test shot velocity at rotation=45 points diagonally."""
+        import math
+
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 45.0
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+
+        expected_x = -PLAYER_STATS.PLAYER_SHOOT_SPEED * math.sin(math.radians(45))
+        expected_y = PLAYER_STATS.PLAYER_SHOOT_SPEED * math.cos(math.radians(45))
+
+        assert shot.velocity.x == pytest.approx(expected_x, abs=0.1)
+        assert shot.velocity.y == pytest.approx(expected_y, abs=0.1)
+
+    def test_shoot_creates_shot_at_player_position(self, mocker: MockerFixture) -> None:
+        """Test shot is created at player's current position."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        captured_positions: list[tuple[float, float]] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            captured_positions.append((x, y))
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(250.0, 350.0)
+        player.shoot()
+
+        assert len(captured_positions) == 1
+        assert captured_positions[0] == (250.0, 350.0)
+
+    def test_shoot_uses_player_radius_for_shot(self, mocker: MockerFixture) -> None:
+        """Test shot is created with player's radius."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        captured_radii: list[int] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            captured_radii.append(radius)
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.shoot()
+
+        assert len(captured_radii) == 1
+        assert captured_radii[0] == player.radius
+
+    def test_shoot_velocity_magnitude_equals_shoot_speed(self, mocker: MockerFixture) -> None:
+        """Test shot velocity magnitude equals PLAYER_SHOOT_SPEED."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 37.0  # Arbitrary angle
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+
+        magnitude = shot.velocity.length()
+        assert magnitude == pytest.approx(PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+
+    def test_shoot_with_negative_rotation(self, mocker: MockerFixture) -> None:
+        """Test shoot() works with negative rotation angles."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = -90.0  # Same as 270
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At -90 degrees, velocity should point in (1, 0) direction
+        assert shot.velocity.x == pytest.approx(PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+        assert shot.velocity.y == pytest.approx(0.0, abs=0.01)
+
+    def test_shoot_with_rotation_over_360(self, mocker: MockerFixture) -> None:
+        """Test shoot() works with rotation > 360 degrees."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 450.0  # Same as 90
+        player.shoot()
+
+        assert len(created_shots) == 1
+        shot = created_shots[0]
+        # At 450 (= 90) degrees, velocity should point in (-1, 0) direction
+        assert shot.velocity.x == pytest.approx(-PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+        assert shot.velocity.y == pytest.approx(0.0, abs=0.01)
+
+    def test_multiple_shoots_create_multiple_shots(self, mocker: MockerFixture) -> None:
+        """Test multiple shoot() calls create multiple shots."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        player.shoot()
+        player.shoot()
+        player.shoot()
+
+        assert shot_count == 3
+
+    def test_shoot_after_rotation_uses_new_direction(self, mocker: MockerFixture) -> None:
+        """Test shoot() uses current rotation after player rotates."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        created_shots: list[Shot] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            original_init(self, x, y, radius)
+            created_shots.append(self)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.shoot()  # First shot at rotation 0
+
+        player.rotation = 180.0
+        player.shoot()  # Second shot at rotation 180
+
+        assert len(created_shots) == 2
+
+        # First shot should point up
+        assert created_shots[0].velocity.y == pytest.approx(PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+
+        # Second shot should point down
+        assert created_shots[1].velocity.y == pytest.approx(-PLAYER_STATS.PLAYER_SHOOT_SPEED, abs=0.01)
+
+    def test_shoot_after_move_uses_new_position(self, mocker: MockerFixture) -> None:
+        """Test shoot() uses current position after player moves."""
+        from shot import Shot
+
+        original_init = Shot.__init__
+        captured_positions: list[tuple[float, float]] = []
+
+        def capture_shot(self: Shot, x: float, y: float, radius: int) -> None:
+            captured_positions.append((x, y))
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", capture_shot)
+
+        player = Player(100.0, 100.0)
+        player.shoot()  # First shot at (100, 100)
+
+        player.position = pygame.Vector2(500.0, 500.0)
+        player.shoot()  # Second shot at (500, 500)
+
+        assert len(captured_positions) == 2
+        assert captured_positions[0] == (100.0, 100.0)
+        assert captured_positions[1] == (500.0, 500.0)
