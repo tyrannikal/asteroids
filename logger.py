@@ -1,5 +1,3 @@
-"""Game state and event logging for debugging and analysis."""
-
 import inspect
 import json
 import math
@@ -12,7 +10,7 @@ from constants import LOG_CONFIG
 __all__ = ["log_event", "log_state"]
 
 
-# pylint: disable=invalid-name  # Module-level state variables intentionally private
+# pylint: disable=invalid-name
 _frame_count = 0
 _state_log_initialized = False
 _event_log_initialized = False
@@ -20,14 +18,11 @@ _start_time = datetime.now(UTC)
 
 
 def log_state() -> None:  # noqa: C901, PLR0912
-    """Log current game state by introspecting caller's local variables."""
     global _frame_count, _state_log_initialized  # noqa: PLW0603  # pylint: disable=global-statement
 
-    # Stop logging after `LOG_CONFIG.MAX_SECONDS` seconds
     if _frame_count > LOG_CONFIG.FPS * LOG_CONFIG.MAX_SECONDS:
         return
 
-    # Take a snapshot approx. once per second
     _frame_count += 1
     if _frame_count % LOG_CONFIG.FPS != 0:
         return
@@ -118,7 +113,6 @@ def log_state() -> None:  # noqa: C901, PLR0912
         **game_state,
     }
 
-    # New log file on each run
     mode = "w" if not _state_log_initialized else "a"
     with Path("game_state.jsonl").open(mode, encoding="utf-8") as f:
         f.write(json.dumps(entry) + "\n")

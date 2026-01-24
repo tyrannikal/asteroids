@@ -79,7 +79,6 @@ class AsteroidField(pygame.sprite.Sprite):
         if self.spawn_timer > ASTEROID_STATS.ASTEROID_SPAWN_RATE_SECONDS:
             self.spawn_timer = 0
 
-            # spawn a new asteroid at a random edge
             assert len(self.edges) > 0, "self.edges cannot be empty"
             edge: list[pygame.Vector2 | Callable[[float], pygame.Vector2]] = random.choice(
                 self.edges,

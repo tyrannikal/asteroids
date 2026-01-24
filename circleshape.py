@@ -1,5 +1,3 @@
-"""Base class for circular game objects with position and velocity."""
-
 from typing import Any
 
 import pygame
@@ -7,8 +5,6 @@ from pydantic_core import core_schema
 
 
 class CircleShape(pygame.sprite.Sprite):
-    """Base class for game objects with circular collision detection."""
-
     def __init__(self, x: float, y: float, radius: int) -> None:
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
@@ -43,10 +39,10 @@ class CircleShape(pygame.sprite.Sprite):
         return value
 
     def draw(self, screen: "pygame.Surface") -> None:
-        _ = screen  # Abstract method - to be implemented by subclasses
+        _ = screen
 
     def update(self, dt: float) -> None:
-        _ = dt  # Abstract method - to be implemented by subclasses
+        _ = dt
 
     def collides_with(self, other: "CircleShape") -> bool:
         return self.position.distance_to(other.position) < self.radius + other.radius
