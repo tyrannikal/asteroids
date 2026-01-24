@@ -143,7 +143,7 @@ def check_shot_asteroid_collisions(
             if shot.collides_with(some_asteroid):
                 log_event("asteroid_shot")
                 shot.kill()
-                some_asteroid.kill()
+                some_asteroid.split()
 
 
 @validate_call(validate_return=True)

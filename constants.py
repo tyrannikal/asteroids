@@ -15,6 +15,9 @@ asteroid_min_radius_literal = 20
 asteroid_kinds_literal = 3
 asteroid_spawn_rate_seconds_literal = 0.8
 asteroid_max_radius_literal = asteroid_min_radius_literal * asteroid_kinds_literal
+asteroid_split_angle_min_literal = 20
+asteroid_split_angle_max_literal = 50
+asteroid_split_speed_multiplier = 1.2
 
 line_width_literal = 2
 fps_literal = 60
@@ -100,19 +103,40 @@ class AsteroidStats(BaseModel):
         default=asteroid_max_radius_literal,
         validate_default=True,
     )
+    ASTEROID_SPLIT_ANGLE_MIN: int = Field(
+        gt=0,
+        default=asteroid_split_angle_min_literal,
+        validate_default=True,
+    )
+    ASTEROID_SPLIT_ANGLE_MAX: int = Field(
+        gt=0,
+        default=asteroid_split_angle_max_literal,
+        validate_default=True,
+    )
+    ASTEROID_SPLIT_SPEED_MULTIPLIER: float = Field(
+        gt=0,
+        default=asteroid_split_speed_multiplier,
+        validate_default=True,
+    )
     model_config = ConfigDict(frozen=True)
 
     @field_validator(
         "ASTEROID_MIN_RADIUS",
         "ASTEROID_KINDS",
         "ASTEROID_MAX_RADIUS",
+        "ASTEROID_SPLIT_ANGLE_MIN",
+        "ASTEROID_SPLIT_ANGLE_MAX",
         mode="before",
     )
     @classmethod
     def convert_to_int(cls, v: float) -> int:
         return int(v)
 
-    @field_validator("ASTEROID_SPAWN_RATE_SECONDS", mode="before")
+    @field_validator(
+        "ASTEROID_SPAWN_RATE_SECONDS",
+        "ASTEROID_SPLIT_SPEED_MULTIPLIER",
+        mode="before",
+    )
     @classmethod
     def convert_to_float(cls, v: int) -> float:
         return float(v)
