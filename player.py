@@ -21,6 +21,7 @@ class Player(CircleShape):
 
         super().__init__(x, y, PLAYER_STATS.PLAYER_RADIUS)
         self.rotation: float = 0.0
+        self.shoot_cooldown: float = 0.0
 
     @classmethod
     def __get_pydantic_core_schema__(
@@ -94,6 +95,8 @@ class Player(CircleShape):
         assert isinstance(keys[pygame.K_a], bool), "keys[pygame.K_a] must be a bool"
         assert isinstance(keys[pygame.K_d], bool), "keys[pygame.K_d] must be a bool"
 
+        self.shoot_cooldown -= dt
+
         if keys[pygame.K_a]:
             self.rotate(dt)
         if keys[pygame.K_d]:
@@ -102,8 +105,9 @@ class Player(CircleShape):
             self.move(dt)
         if keys[pygame.K_s]:
             self.move(dt * -1)
-        if keys[pygame.K_SPACE]:
+        if keys[pygame.K_SPACE] and self.shoot_cooldown <= 0:
             self.shoot()
+            self.shoot_cooldown = PLAYER_STATS.PLAYER_SHOOT_COOLDOWN_SECONDS
 
     @validate_call(validate_return=True)
     def move(self, dt: float) -> None:

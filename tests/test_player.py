@@ -993,3 +993,285 @@ class TestPlayerShoot:
         assert len(captured_positions) == 2
         assert captured_positions[0] == (100.0, 100.0)
         assert captured_positions[1] == (500.0, 500.0)
+
+
+@pytest.mark.unit
+class TestPlayerShootCooldown:
+    """Tests for Player shoot cooldown mechanic."""
+
+    def test_initial_shoot_cooldown_is_zero(self) -> None:
+        """Test shoot_cooldown initializes to 0.0."""
+        player = Player(100.0, 100.0)
+        assert player.shoot_cooldown == 0.0
+
+    def test_shoot_cooldown_decrements_each_update(self, mocker: MockerFixture) -> None:
+        """Test shoot_cooldown decreases by dt each update call."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.5
+        player.update(0.1)
+
+        assert player.shoot_cooldown == pytest.approx(0.4, abs=0.001)
+
+    def test_shoot_cooldown_can_go_negative(self, mocker: MockerFixture) -> None:
+        """Test shoot_cooldown can become negative (no clamping)."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.05
+        player.update(0.1)
+
+        assert player.shoot_cooldown == pytest.approx(-0.05, abs=0.001)
+
+    def test_shooting_blocked_during_cooldown(self, mocker: MockerFixture) -> None:
+        """Test that space key does not fire when cooldown > 0."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.2  # Cooldown active
+        player.update(0.1)  # Space pressed but cooldown still > 0
+
+        assert shot_count == 0
+        assert player.shoot_cooldown == pytest.approx(0.1, abs=0.001)
+
+    def test_shooting_allowed_when_cooldown_zero(self, mocker: MockerFixture) -> None:
+        """Test that space key fires when cooldown equals 0."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.0
+        player.update(0.1)
+
+        assert shot_count == 1
+
+    def test_shooting_allowed_when_cooldown_negative(self, mocker: MockerFixture) -> None:
+        """Test that space key fires when cooldown is negative."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = -0.5  # Negative cooldown (overshoot)
+        player.update(0.1)
+
+        assert shot_count == 1
+
+    def test_cooldown_reset_after_shooting(self, mocker: MockerFixture) -> None:
+        """Test cooldown is set to PLAYER_SHOOT_COOLDOWN_SECONDS after shooting."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        mocker.patch.object(
+            Shot,
+            "__init__",
+            lambda self, x, y, radius: original_init(self, x, y, radius),
+        )
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.0
+        player.update(0.1)
+
+        # Cooldown should be reset to PLAYER_SHOOT_COOLDOWN_SECONDS minus the dt decrement
+        # that happened at the start of update() - but the reset happens AFTER shooting
+        expected = PLAYER_STATS.PLAYER_SHOOT_COOLDOWN_SECONDS
+        assert player.shoot_cooldown == pytest.approx(expected, abs=0.001)
+
+    def test_rapid_shooting_blocked_by_cooldown(self, mocker: MockerFixture) -> None:
+        """Test rapid fire is blocked - only 1 shot per cooldown period."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        # Simulate rapid updates while holding space (10 updates at 60fps)
+        for _ in range(10):
+            player.update(0.0167)  # ~60fps frame time
+
+        # Only 1 shot should have been fired (cooldown is 0.3s)
+        assert shot_count == 1
+
+    def test_second_shot_after_cooldown_expires(self, mocker: MockerFixture) -> None:
+        """Test second shot fires after cooldown period elapses."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+
+        # First shot
+        player.update(0.1)
+        assert shot_count == 1
+
+        # Wait for cooldown to expire (0.3s total)
+        player.update(0.1)  # 0.2s elapsed
+        assert shot_count == 1  # Still blocked
+        player.update(0.1)  # 0.3s elapsed
+        assert shot_count == 1  # Still blocked (cooldown == 0.0)
+        player.update(0.1)  # 0.4s elapsed, cooldown now negative
+        assert shot_count == 2  # Second shot fired
+
+    def test_cooldown_uses_correct_constant(self, mocker: MockerFixture) -> None:
+        """Test cooldown uses PLAYER_STATS.PLAYER_SHOOT_COOLDOWN_SECONDS."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        mocker.patch.object(
+            Shot,
+            "__init__",
+            lambda self, x, y, radius: original_init(self, x, y, radius),
+        )
+
+        player = Player(100.0, 100.0)
+        player.update(0.0)  # Fire with dt=0 so no decrement
+
+        assert player.shoot_cooldown == PLAYER_STATS.PLAYER_SHOOT_COOLDOWN_SECONDS
+        assert player.shoot_cooldown == 0.3  # Verify the actual value
+
+    def test_movement_and_rotation_still_work_during_cooldown(
+        self, mocker: MockerFixture
+    ) -> None:
+        """Test that player can still move and rotate during shoot cooldown."""
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key in (pygame.K_a, pygame.K_w)
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        player = Player(100.0, 100.0)
+        player.rotation = 0.0
+        player.shoot_cooldown = 0.5  # Cooldown active
+
+        player.update(0.1)
+
+        # Player should still rotate and move
+        assert player.rotation == pytest.approx(30.0, abs=0.01)  # 300 * 0.1
+        assert player.position.y != 100.0  # Has moved
+
+    def test_cooldown_decrement_happens_before_shoot_check(
+        self, mocker: MockerFixture
+    ) -> None:
+        """Test cooldown is decremented before checking if can shoot."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: key == pygame.K_SPACE
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        # Set cooldown to exactly dt so decrement makes it 0
+        player.shoot_cooldown = 0.1
+        player.update(0.1)
+
+        # Should fire because cooldown is decremented to 0 before check
+        assert shot_count == 1
+
+    def test_no_shot_without_space_key_even_when_cooldown_ready(
+        self, mocker: MockerFixture
+    ) -> None:
+        """Test no shot fires without space key even when cooldown allows."""
+        from shot import Shot
+
+        mock_keys = MagicMock(spec=pygame.key.ScancodeWrapper)
+        mock_keys.__getitem__ = lambda self, key: False  # No keys pressed
+        mocker.patch("pygame.key.get_pressed", return_value=mock_keys)
+
+        original_init = Shot.__init__
+        shot_count = 0
+
+        def count_shots(self: Shot, x: float, y: float, radius: int) -> None:
+            nonlocal shot_count
+            shot_count += 1
+            original_init(self, x, y, radius)
+
+        mocker.patch.object(Shot, "__init__", count_shots)
+
+        player = Player(100.0, 100.0)
+        player.shoot_cooldown = 0.0  # Ready to shoot
+        player.update(0.1)
+
+        assert shot_count == 0
