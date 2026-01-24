@@ -13,6 +13,7 @@ from asteroidfield import AsteroidField
 from constants import GAME_AREA
 from logger import log_event, log_state
 from player import Player
+from shot import Shot
 from validationfunctions import RectWrapped, SurfaceWrapped
 
 # Tiger Style requirement: Ensure assertions are never disabled
@@ -89,23 +90,17 @@ def main() -> None:
     wrapped_screen: SurfaceWrapped = SurfaceWrapped.model_validate(new_screen)
     assert isinstance(wrapped_screen, SurfaceWrapped), "model_validate must return SurfaceWrapped"
 
-    # pylint: disable=line-too-long
-    updatable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
-        pygame.sprite.Group()
-    )
-    assert isinstance(updatable, pygame.sprite.Group), "updatable must be a Group"
-
-    drawable: pygame.sprite.Group = (  # type: ignore[type-arg]  # pyright: ignore[reportUnknownVariableType]
-        pygame.sprite.Group()
-    )
-    # pylint: enable=line-too-long
-    assert isinstance(drawable, pygame.sprite.Group), "drawable must be a Group"
-
+    updatable: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
+    drawable: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
+    shots: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
     asteroids: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
-    # pylint: enable=line-too-long
-    assert isinstance(asteroids, pygame.sprite.Group), "asteroids must be a Group"
+    group: pygame.sprite.Group  # type: ignore[type-arg]
+    # pylint: disable-next=line-too-long
+    for group in (updatable, drawable, shots, asteroids):  # pyright: ignore[reportUnknownVariableType]
+        assert isinstance(group, pygame.sprite.Group), "sprite groups must be Group instances"
 
     Player.containers = (updatable, drawable)  # type: ignore[attr-defined]
+    Shot.containers = (shots, updatable, drawable)  # type: ignore[attr-defined]
     Asteroid.containers = (asteroids, updatable, drawable)  # type: ignore[attr-defined]
     AsteroidField.containers = (updatable,)
 

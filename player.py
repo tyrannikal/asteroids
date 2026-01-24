@@ -7,7 +7,8 @@ from pydantic import validate_call
 from pydantic_core import core_schema
 
 from circleshape import CircleShape
-from constants import PLAYER_DIMS
+from constants import PLAYER_STATS
+from shot import Shot
 from validationfunctions import SurfaceWrapped
 
 
@@ -18,7 +19,7 @@ class Player(CircleShape):
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
 
-        super().__init__(x, y, PLAYER_DIMS.PLAYER_RADIUS)
+        super().__init__(x, y, PLAYER_STATS.PLAYER_RADIUS)
         self.rotation: float = 0.0
 
     @classmethod
@@ -35,7 +36,7 @@ class Player(CircleShape):
     @staticmethod
     def _validate(value: Any) -> "Player":  # noqa: ANN401
         if not isinstance(value, Player):
-            msg = "must be of type Player"
+            msg: str = "must be of type Player"
             raise TypeError(msg)
         return value
 
@@ -43,11 +44,10 @@ class Player(CircleShape):
     def triangle(self) -> list[pygame.Vector2]:
         forward: pygame.Vector2 = pygame.Vector2(0, 1).rotate(self.rotation)
         assert isinstance(forward, pygame.Vector2), "pygame.Vector2.rotate must return a Vector2"
-
         right: pygame.Vector2 = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
         assert isinstance(right, pygame.Vector2), "pygame.Vector2.rotate must return a Vector2"
 
-        new_triangle = [
+        new_triangle: list[pygame.Vector2] = [
             self.position + forward * self.radius,
             self.position - forward * self.radius - right,
             self.position - forward * self.radius + right,
@@ -73,7 +73,7 @@ class Player(CircleShape):
             screen.object,
             "white",
             get_player_triangle,
-            PLAYER_DIMS.LINE_WIDTH,
+            PLAYER_STATS.LINE_WIDTH,
         )
         assert isinstance(
             draw_player,
@@ -82,11 +82,11 @@ class Player(CircleShape):
 
     @validate_call(validate_return=True)
     def rotate(self, dt: float) -> None:
-        self.rotation += PLAYER_DIMS.PLAYER_TURN_SPEED * dt
+        self.rotation += PLAYER_STATS.PLAYER_TURN_SPEED * dt
 
     @validate_call(validate_return=True)
     def update(self, dt: float) -> None:
-        keys = pygame.key.get_pressed()
+        keys: pygame.key.ScancodeWrapper = pygame.key.get_pressed()
         assert isinstance(
             keys,
             pygame.key.ScancodeWrapper,
@@ -102,17 +102,20 @@ class Player(CircleShape):
             self.move(dt)
         if keys[pygame.K_s]:
             self.move(dt * -1)
+        if keys[pygame.K_SPACE]:
+            self.shoot()
 
+    @validate_call(validate_return=True)
     def move(self, dt: float) -> None:
-        unit_vector = pygame.Vector2(0, 1)
+        unit_vector: pygame.Vector2 = pygame.Vector2(0, 1)
         assert isinstance(unit_vector, pygame.Vector2), "unit_vector must return Vector2"
 
         assert isinstance(self.rotation, float), "self.rotation must be a float"
-        rotated_vector = unit_vector.rotate(self.rotation)
+        rotated_vector: pygame.Vector2 = unit_vector.rotate(self.rotation)
         assert isinstance(rotated_vector, pygame.Vector2), "rotated_vector must return Vector2"
 
         assert isinstance(dt, float), "dt must be a float"
-        rotated_with_speed_vector = rotated_vector * PLAYER_DIMS.PLAYER_SPEED * dt
+        rotated_with_speed_vector: pygame.Vector2 = rotated_vector * PLAYER_STATS.PLAYER_SPEED * dt
         assert isinstance(
             rotated_with_speed_vector,
             pygame.Vector2,
@@ -120,3 +123,17 @@ class Player(CircleShape):
 
         self.position += rotated_with_speed_vector
         assert isinstance(self.position, pygame.Vector2), "self.position must be a Vector2"
+
+    @validate_call(validate_return=True)
+    def shoot(self) -> None:
+        new_shot: Shot = Shot(self.position[0], self.position[1], self.radius)
+        assert isinstance(new_shot, Shot), "new_shot must be a Shot"
+
+        velocity: pygame.Vector2 = pygame.Vector2(0, 1)
+        assert isinstance(velocity, pygame.Vector2), "velocity must return Vector2"
+
+        assert isinstance(self.rotation, float), "self.rotation must be a float"
+        new_shot.velocity = velocity.rotate(self.rotation)
+        assert isinstance(new_shot.velocity, pygame.Vector2), "rotated_vector must return Vector2"
+
+        new_shot.velocity *= PLAYER_STATS.PLAYER_SHOOT_SPEED

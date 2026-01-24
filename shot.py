@@ -9,7 +9,7 @@ from constants import PLAYER_STATS
 from validationfunctions import SurfaceWrapped
 
 
-class Asteroid(CircleShape):
+class Shot(CircleShape):
     def __init__(self, x: float, y: float, radius: int) -> None:
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
@@ -29,15 +29,15 @@ class Asteroid(CircleShape):
         )
 
     @staticmethod
-    def _validate(value: Any) -> "Asteroid":  # noqa: ANN401
-        if not isinstance(value, Asteroid):
-            msg = "must be of type Asteroid"
+    def _validate(value: Any) -> "Shot":  # noqa: ANN401
+        if not isinstance(value, Shot):
+            msg = "must be of type Shot"
             raise TypeError(msg)
         return value
 
     @validate_call(validate_return=True)
     def draw(self, screen: SurfaceWrapped) -> None:  # type: ignore[override]
-        draw_asteroid: pygame.rect.Rect = pygame.draw.circle(
+        draw_bullet: pygame.rect.Rect = pygame.draw.circle(
             screen.object,
             "white",
             self.position,
@@ -45,7 +45,7 @@ class Asteroid(CircleShape):
             PLAYER_STATS.LINE_WIDTH,
         )
         assert isinstance(
-            draw_asteroid,
+            draw_bullet,
             pygame.rect.Rect,
         ), "pygame.draw.circle must return type Rect"
 
