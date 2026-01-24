@@ -1,8 +1,6 @@
-"""Game constants and configuration with Pydantic validation."""
-
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-# pylint: disable=invalid-name  # These are default literals for Pydantic fields
+# pylint: disable=invalid-name
 screen_width_literal = 1280
 screen_height_literal = 720
 
@@ -21,12 +19,10 @@ asteroid_max_radius_literal = asteroid_min_radius_literal * asteroid_kinds_liter
 line_width_literal = 2
 fps_literal = 60
 max_seconds_literal = 16
-sprite_sample_limit_literal = 10  # Maximum number of sprites to log per group
+sprite_sample_limit_literal = 10
 
 
 class PlayerStats(BaseModel):
-    """Player visual dimensions with validated constraints."""
-
     PLAYER_RADIUS: int = Field(
         gt=0,
         default=player_radius_literal,
@@ -84,8 +80,6 @@ class PlayerStats(BaseModel):
 
 
 class AsteroidStats(BaseModel):
-    """Asteroid stats with validated constraints."""
-
     ASTEROID_MIN_RADIUS: int = Field(
         gt=0,
         default=asteroid_min_radius_literal,
@@ -125,8 +119,6 @@ class AsteroidStats(BaseModel):
 
 
 class GameArea(BaseModel):
-    """Game area screen dimensions with validated constraints."""
-
     SCREEN_WIDTH: int = Field(
         gt=0,
         default=screen_width_literal,
@@ -146,8 +138,6 @@ class GameArea(BaseModel):
 
 
 class LoggingConstants(BaseModel):
-    """Logging configuration with validated constraints."""
-
     FPS: int = Field(
         gt=0,
         default=fps_literal,
@@ -171,7 +161,6 @@ class LoggingConstants(BaseModel):
         return int(v)
 
 
-# Module-level singleton instances (immutable, validated constants)
 PLAYER_STATS = PlayerStats()
 ASTEROID_STATS = AsteroidStats()
 GAME_AREA = GameArea()

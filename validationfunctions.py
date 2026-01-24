@@ -1,6 +1,4 @@
-"""Pydantic validation wrappers for pygame types."""
 # pylint: disable=c-extension-no-member,no-self-argument
-# Pygame types are C extensions, validators use cls not self
 
 from typing import Any
 
@@ -14,8 +12,6 @@ from pydantic import (
 
 
 class SurfaceWrapped(BaseModel):
-    """Pydantic wrapper for pygame.Surface with strict validation."""
-
     object: pygame.surface.Surface
 
     model_config = ConfigDict(
@@ -41,8 +37,6 @@ class SurfaceWrapped(BaseModel):
 
 
 class RectWrapped(BaseModel):
-    """Pydantic wrapper for pygame.Rect with strict validation."""
-
     object: pygame.rect.Rect
 
     model_config = ConfigDict(
@@ -68,8 +62,6 @@ class RectWrapped(BaseModel):
 
 
 class Vector2Wrapped(BaseModel):
-    """Pydantic wrapper for pygame.Vector2 with strict validation."""
-
     object: pygame.Vector2
 
     model_config = ConfigDict(

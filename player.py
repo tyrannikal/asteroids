@@ -1,4 +1,4 @@
-# pylint: disable=c-extension-no-member,no-member  # Pygame uses C extensions
+# pylint: disable=c-extension-no-member,no-member
 
 from typing import Any
 
@@ -13,8 +13,6 @@ from validationfunctions import SurfaceWrapped
 
 
 class Player(CircleShape):
-    """Player ship represented as a triangle with rotation."""
-
     def __init__(self, x: float, y: float) -> None:
         assert isinstance(x, float), "x must be a float"
         assert isinstance(y, float), "y must be a float"
