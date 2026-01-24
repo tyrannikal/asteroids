@@ -10,7 +10,8 @@ player_radius_literal = 20
 player_turn_speed_literal = 300
 player_speed_literal = 200
 player_shoot_speed_literal = 500
-shot_radius_literal = 5
+player_shot_radius_literal = 5
+player_shoot_cooldown_seconds_literal = 0.3
 
 asteroid_min_radius_literal = 20
 asteroid_kinds_literal = 3
@@ -51,9 +52,14 @@ class PlayerStats(BaseModel):
         default=player_shoot_speed_literal,
         validate_default=True,
     )
-    SHOT_RADIUS: int = Field(
+    PLAYER_SHOT_RADIUS: int = Field(
         gt=0,
-        default=shot_radius_literal,
+        default=player_shot_radius_literal,
+        validate_default=True,
+    )
+    PLAYER_SHOOT_COOLDOWN_SECONDS: float = Field(
+        gt=0,
+        default=player_shoot_cooldown_seconds_literal,
         validate_default=True,
     )
     model_config = ConfigDict(frozen=True)
@@ -64,12 +70,17 @@ class PlayerStats(BaseModel):
         "PLAYER_TURN_SPEED",
         "PLAYER_SPEED",
         "PLAYER_SHOOT_SPEED",
-        "SHOT_RADIUS",
+        "PLAYER_SHOT_RADIUS",
         mode="before",
     )
     @classmethod
     def convert_to_int(cls, v: float) -> int:
         return int(v)
+
+    @field_validator("PLAYER_SHOOT_COOLDOWN_SECONDS", mode="before")
+    @classmethod
+    def convert_to_float(cls, v: int) -> float:
+        return float(v)
 
 
 class AsteroidStats(BaseModel):

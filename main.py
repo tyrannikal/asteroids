@@ -1,4 +1,5 @@
 """Asteroids game main module with strict validation and Tiger Style compliance."""
+
 # pylint: disable=c-extension-no-member,no-member
 # Pygame uses C extensions with runtime-only member access
 
@@ -94,6 +95,7 @@ def main() -> None:
     drawable: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
     shots: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
     asteroids: pygame.sprite.Group = pygame.sprite.Group()  # type: ignore[type-arg]
+
     group: pygame.sprite.Group  # type: ignore[type-arg]
     # pylint: disable-next=line-too-long
     for group in (updatable, drawable, shots, asteroids):  # pyright: ignore[reportUnknownVariableType]
